@@ -1,7 +1,7 @@
 {
   "name": "Billing",
   "version": "1.0.0",
-  "description": "A minimal Billing application",
+  "description": "A minimal billing application",
   "main": "app.js",
   "scripts": {
     "start": "electron ."
