@@ -1,0 +1,10 @@
+{
+  "name": "electron-quick-start",
+  "version": "1.0.0",
+  "description": "A minimal Electron application",
+  "main": "app.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Arjun"
+}
