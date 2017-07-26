@@ -5,3 +5,23 @@
 .noselectmenu h2 {
   color: #e8e6e8;
 }
+.content-area {
+  padding: 20px 30px;
+}
+.icon-area {
+  font-size: 50px;
+  height: 80px;
+  text-align: center;
+  width: 70px;
+}
+.content-title h2 {
+  margin-top: 13px;
+  font-size: 22px;
+  margin-bottom: -15px;
+}
+.divider {
+  clear: both;
+  border: 1px solid #e2e2e2;
+  width: 100%;
+  border-width: 0 0 1px 0;
+}

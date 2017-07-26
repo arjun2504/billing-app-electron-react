@@ -6,9 +6,20 @@ class Template extends React.Component
 {
   render() {
     return(
+      <div className="content-area">
 
-      <p>This is an template page!</p>
+        <div className="icon-area pull-left">
+          <span className="icon icon-cog"></span>
+        </div>
 
+        <div className="content-title pull-left">
+          <h2>Bill Template</h2>
+          <p>Description goes here</p>
+        </div>
+
+        <div className="divider"></div>
+
+      </div>
     )
   }
 }
