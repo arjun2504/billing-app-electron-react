@@ -56,7 +56,6 @@ class Sidebar extends React.Component
         {
           Object.keys(this.state.items).map(function(key, val) {
             return this.state.items[key].map(function(v, i) {
-              console.log(v);
               var anchorClasses = classNames({
                                     'nav-group-item' : true,
                                     'active' : v.name === this.state.active

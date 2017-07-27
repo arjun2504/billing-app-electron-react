@@ -2,6 +2,7 @@
 
 var React = require('react');
 var PageCard = require('../PageCard.jsx');
+var MySQL = require('mysql');
 
 class Item extends React.Component
 {
@@ -26,6 +27,22 @@ class Item extends React.Component
             'type': 'number',
             'label': 'Price',
             'placeholder': 'Enter Price'
+          },
+          {
+            'name': 'availability',
+            'type': 'select',
+            'label': 'Availability',
+            'placeholder': '',
+            'options': [
+              {
+                'title': 'In Stock',
+                'value': 1
+              },
+              {
+                'title': 'Out of Stock',
+                'value': 0
+              }
+            ]
           }
         ]
       }
@@ -42,6 +59,7 @@ class Item extends React.Component
                 <th>Code</th>
                 <th>Product Name</th>
                 <th>Price</th>
+                <th>Availability</th>
               </tr>
             </thead>
             <tbody>
@@ -49,11 +67,13 @@ class Item extends React.Component
                 <td>1234</td>
                 <td>Shirt</td>
                 <td>300.0</td>
+                <td>In Stock</td>
               </tr>
               <tr>
                 <td>1235</td>
                 <td>T-Shirt</td>
-                <td>600.0</td>
+                <td>500.0</td>
+                <td>Out of Stock</td>
               </tr>
             </tbody>
           </table>
@@ -74,6 +94,20 @@ class Item extends React.Component
                   field = <div className="form-group">
                               <label>{v.label}</label>
                               <input type="number" className="form-control" placeholder={v.placeholder}/>
+                            </div>;
+                  break;
+                case 'select':
+                  field = <div className="form-group">
+                              <label>{v.label}</label>
+                              <select className="form-control">
+                                {
+                                  v.options.map(function(ov, oi) {
+                                    return(
+                                      <option value={ov.value} key={'option-' + ov.value}>{ov.title}</option>
+                                    )
+                                  }.bind(this))
+                                }
+                              </select>
                             </div>;
                   break;
               }
