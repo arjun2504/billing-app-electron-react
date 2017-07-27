@@ -2,22 +2,35 @@
 
 var React = require('react');
 var PageCard = require('../PageCard.jsx');
-var MySQL = require('mysql');
+var api = require('electron').remote.getGlobal('sharedObj').api;
+var $ = require('jquery');
 
 class Item extends React.Component
 {
+  formdata(code = '', name = '', price = '', avl = '-1') {
+    return ({'product_code': code,
+      'product_name': name,
+      'price': price,
+      'is_available': avl
+    })
+  }
+
   constructor(props) {
       super(props);
       this.state = {
+        'buttonLabel': 'Add',
+        'formtitle': 'Add to Stock',
+        'formdata': this.formdata(),
+        'items': [],
         'fields': [
           {
-            'name': 'code',
+            'name': 'product_code',
             'type': 'number',
             'label': 'Product Code',
             'placeholder': 'Enter Product Code'
           },
           {
-            'name': 'product-name',
+            'name': 'product_name',
             'type': 'text',
             'label': 'Product Name',
             'placeholder': 'Enter name of the product'
@@ -29,11 +42,15 @@ class Item extends React.Component
             'placeholder': 'Enter Price'
           },
           {
-            'name': 'availability',
+            'name': 'is_available',
             'type': 'select',
             'label': 'Availability',
             'placeholder': '',
             'options': [
+              {
+                'title': '--',
+                'value': -1
+              },
               {
                 'title': 'In Stock',
                 'value': 1
@@ -46,8 +63,120 @@ class Item extends React.Component
           }
         ]
       }
+      this.handleChange = this.handleChange.bind(this);
+      this.handleAddItem = this.handleAddItem.bind(this);
+      this.handleRowSelect = this.handleRowSelect.bind(this);
   }
 
+  componentDidMount() {
+    this.getData();
+  }
+
+  getData() {
+    fetch(api + "stock/all")
+            .then( (response) => {
+                return response.json() })
+                    .then( (json) => {
+                        this.setState({items: json});
+                    });
+  }
+
+  handleAddItem(e) {
+    e.preventDefault();
+
+    this.state.formdata.product_code = e.target.product_code.value;
+    this.state.formdata.product_name = e.target.product_name.value;
+    this.state.formdata.price = e.target.price.value;
+    this.state.formdata.is_available = e.target.is_available.value;
+
+    fetch(api + "stock/add", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(this.state.formdata)
+    }).then( (response) => {
+      return response.json()
+    }).then( (json) => {
+      if(json.status === "success") {
+        this.getData();
+      }
+    });
+  }
+
+  handleChange(e) {
+    this.state.formdata[e.target.name] = e.target.value;
+  }
+
+  handleRowSelect(itemId) {
+    fetch(api + "stock/item/" + itemId).then( (response) => {
+      return response.json();
+    }).then( (json) => {
+
+      var fdata = this.formdata(json.product_code, json.product_name, json.price, json.is_available);
+      console.log(fdata);
+      this.setState({ 'formtitle': 'Edit ' + json.product_name, 'buttonLabel': 'Update', 'formdata': fdata });
+      this.renderForm();
+    });
+  }
+
+  renderForm() {
+    return(
+      <div className="stock-management pull-right">
+        <h2 className="settings-category">{this.state.formtitle}</h2>
+      <form action={api + 'stock/add'} method="post" onSubmit={this.handleAddItem} id="addform">
+      {
+        this.state.fields.map(function(v,i) {
+          let field;
+          switch(v.type) {
+            case 'text':
+              field = <div className="form-group">
+                          <label>{v.label}</label>
+                          <input type="text" value={this.state.formdata[v.name]} onChange={this.handleChange} name={v.name} className="form-control" placeholder={v.placeholder}/>
+                        </div>;
+              break;
+            case 'number':
+              field = <div className="form-group">
+                          <label>{v.label}</label>
+                          <input type="number" value={this.state.formdata[v.name]} onChange={this.handleChange} name={v.name} className="form-control" placeholder={v.placeholder}/>
+                        </div>;
+              break;
+            case 'select':
+              field = <div className="form-group">
+                          <label>{v.label}</label>
+                          <select className="form-control" name={v.name} onChange={this.handleChange}>
+                            {
+                              v.options.map(function(ov, oi) {
+                                let selected;
+                                if(ov.value === this.state.formdata[v.name])
+                                  selected = "selected";
+
+                                return(
+                                  <option selected={selected} value={ov.value} key={'option-' + ov.value}>{ov.title}</option>
+                                )
+                              }.bind(this))
+                            }
+                          </select>
+                        </div>;
+              break;
+          }
+
+
+          return(
+            <span key={'field-' + v.name}>{field}</span>
+          )
+        }.bind(this))
+      }
+      <br/>
+      <div className="form-actions">
+        <button type="submit" className="btn btn-form btn-primary">{this.state.buttonLabel}</button>
+      </div>
+      <br/>
+      </form>
+      </div>
+    )
+  }
   render() {
     return(
 
@@ -63,68 +192,27 @@ class Item extends React.Component
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1234</td>
-                <td>Shirt</td>
-                <td>300.0</td>
-                <td>In Stock</td>
-              </tr>
-              <tr>
-                <td>1235</td>
-                <td>T-Shirt</td>
-                <td>500.0</td>
-                <td>Out of Stock</td>
-              </tr>
-            </tbody>
-          </table>
-        <div className="stock-management pull-right">
-          <h2 className="settings-category">Add to Stock</h2>
-          <form>
-          {
-            this.state.fields.map(function(v,i) {
-              let field;
-              switch(v.type) {
-                case 'text':
-                  field = <div className="form-group">
-                              <label>{v.label}</label>
-                              <input type="text" className="form-control" placeholder={v.placeholder}/>
-                            </div>;
-                  break;
-                case 'number':
-                  field = <div className="form-group">
-                              <label>{v.label}</label>
-                              <input type="number" className="form-control" placeholder={v.placeholder}/>
-                            </div>;
-                  break;
-                case 'select':
-                  field = <div className="form-group">
-                              <label>{v.label}</label>
-                              <select className="form-control">
-                                {
-                                  v.options.map(function(ov, oi) {
-                                    return(
-                                      <option value={ov.value} key={'option-' + ov.value}>{ov.title}</option>
-                                    )
-                                  }.bind(this))
-                                }
-                              </select>
-                            </div>;
-                  break;
+              {
+                this.state.items.map(function(v, i) {
+                  let availability
+                  availability = (v.is_available == 1) ? "In Stock" : "Out of Stock";
+
+                  return(
+                    <tr key={v.id} onClick={() => { this.handleRowSelect(v.id) } } id={'row-' + v.id}>
+                      <td>{v.product_code}</td>
+                      <td>{v.product_name}</td>
+                      <td>{v.price}</td>
+                      <td>{availability}</td>
+                    </tr>
+                  )
+                }.bind(this))
               }
 
+            </tbody>
+          </table>
 
-              return(
-                <span key={'field-' + v.name}>{field}</span>
-              )
-            }.bind(this))
-          }
-          <br/>
-          <div className="form-actions">
-            <button type="submit" className="btn btn-form btn-primary">Add</button>
-          </div>
-          <br/>
-          </form>
-        </div>
+          {this.renderForm()}
+
       </div>
     )
   }
