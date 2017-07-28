@@ -41,3 +41,41 @@
   width:40%;
   padding: 20px;
 }
+/*.tab-group {
+  position: fixed;
+  height: 25px;
+  width: 100%;
+}
+.custom-invoice-pane tr:first-child {
+  margin-top: 25px;
+  position: fixed;
+  width: 100%;
+  display: inherit;
+}
+.custom-invoice-pane tr:nth-child(2) {
+  margin-top: 50px;
+}*/
+.data-content {
+  height: 60%;
+  width: 100%;
+}
+.tab-content {
+  width:100%;
+  max-height: inherit;
+  overflow: scroll;
+}
+.custom-invoice-pane {
+  padding: 1px 0px;
+  font-size: 20px;
+  padding-bottom: 222px;
+}
+.total-content {
+  bottom: 22px;
+  position: fixed;
+  height: 200px;
+  width: 100%;
+  background-color: #fff;
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  border-top-color: #f3f3f3;
+}

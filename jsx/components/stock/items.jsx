@@ -18,6 +18,7 @@ class Item extends React.Component
   constructor(props) {
       super(props);
       this.state = {
+        'showAddNew': false,
         'buttonLabel': 'Add',
         'formtitle': 'Add to Stock',
         'formdata': this.formdata(),
@@ -60,12 +61,21 @@ class Item extends React.Component
                 'value': 0
               }
             ]
+          },
+          {
+            'name': 'mode',
+            'type': 'hidden'
+          },
+          {
+            'name': 'item_id',
+            'type': 'hidden'
           }
         ]
       }
       this.handleChange = this.handleChange.bind(this);
       this.handleAddItem = this.handleAddItem.bind(this);
       this.handleRowSelect = this.handleRowSelect.bind(this);
+      this.handleDeleteItem = this.handleDeleteItem.bind(this);
   }
 
   componentDidMount() {
@@ -88,8 +98,12 @@ class Item extends React.Component
     this.state.formdata.product_name = e.target.product_name.value;
     this.state.formdata.price = e.target.price.value;
     this.state.formdata.is_available = e.target.is_available.value;
+    let route;
+    route = "stock/add";
 
-    fetch(api + "stock/add", {
+    route = (e.target.mode.value == "add") ? "stock/add" : "stock/update/" + e.target.item_id.value;
+
+    fetch(api + route, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -115,10 +129,47 @@ class Item extends React.Component
     }).then( (json) => {
 
       var fdata = this.formdata(json.product_code, json.product_name, json.price, json.is_available);
-      console.log(fdata);
-      this.setState({ 'formtitle': 'Edit ' + json.product_name, 'buttonLabel': 'Update', 'formdata': fdata });
+      //console.log(fdata);
+      this.setState({ 'formtitle': 'Edit ' + json.product_name, 'buttonLabel': 'Update', 'formdata': fdata, 'showAddNew': true, 'currentEdit': itemId });
+      document.getElementById('product_code').value = json.product_code;
+      document.getElementById('product_name').value = json.product_name;
+      document.getElementById('price').value = json.price;
+      document.getElementById('item_id').value = json.id;
+      document.getElementById('mode').value = 'edit';
+      if(json.is_available == 1) {
+        document.getElementById('is_available').options[1].selected = true;
+      } else {
+        document.getElementById('is_available').options[2].selected = true;
+      }
       this.renderForm();
     });
+  }
+
+  handleDeleteItem(itemId) {
+    var url = api + "stock/delete";
+    fetch(api + "stock/delete", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 'id': itemId })
+    }).then((response) => { return response.json(); }).then((json) => {
+      if(json.status == "success") {
+        this.getData();
+        this.renderEmptyForm();
+      }
+    })
+  }
+
+  renderEmptyForm() {
+    this.setState({ 'formtitle': 'Add to Stock', 'buttonLabel': 'Add', 'formdata': this.formdata(), 'showAddNew': false, 'currentEdit': -1 });
+    document.getElementById('product_code').value = '';
+    document.getElementById('product_name').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('is_available').options[0].selected = true;
+    document.getElementById('mode').value = 'add';
+    this.renderForm();
   }
 
   renderForm() {
@@ -133,44 +184,56 @@ class Item extends React.Component
             case 'text':
               field = <div className="form-group">
                           <label>{v.label}</label>
-                          <input type="text" value={this.state.formdata[v.name]} onChange={this.handleChange} name={v.name} className="form-control" placeholder={v.placeholder}/>
+                          <input type="text" onChange={this.handleChange} id={v.name} name={v.name} className="form-control" placeholder={v.placeholder}/>
                         </div>;
               break;
             case 'number':
               field = <div className="form-group">
                           <label>{v.label}</label>
-                          <input type="number" value={this.state.formdata[v.name]} onChange={this.handleChange} name={v.name} className="form-control" placeholder={v.placeholder}/>
+                          <input type="number" onChange={this.handleChange} id={v.name} name={v.name} className="form-control" placeholder={v.placeholder}/>
                         </div>;
               break;
             case 'select':
               field = <div className="form-group">
                           <label>{v.label}</label>
-                          <select className="form-control" name={v.name} onChange={this.handleChange}>
+                          <select className="form-control" name={v.name} onChange={this.handleChange} id={v.name}>
                             {
                               v.options.map(function(ov, oi) {
-                                let selected;
-                                if(ov.value === this.state.formdata[v.name])
-                                  selected = "selected";
+                                // let selected;
+                                // if(ov.value === this.state.formdata[v.name])
+                                //   selected = "selected";
 
                                 return(
-                                  <option selected={selected} value={ov.value} key={'option-' + ov.value}>{ov.title}</option>
+                                  <option value={ov.value} key={'option-' + ov.value}>{ov.title}</option>
                                 )
                               }.bind(this))
                             }
                           </select>
                         </div>;
               break;
+            case 'hidden':
+              if(v.name == 'mode')
+                field = <input type="hidden" name={v.name} id={v.name} value="add"/>;
+              else
+                field = <input type="hidden" name={v.name} id={v.name} value="edit"/>;
+              break;
           }
-
 
           return(
             <span key={'field-' + v.name}>{field}</span>
           )
         }.bind(this))
+
       }
       <br/>
       <div className="form-actions">
-        <button type="submit" className="btn btn-form btn-primary">{this.state.buttonLabel}</button>
+        <button type="submit" className="btn btn-form btn-primary pull-left">{this.state.buttonLabel}</button>
+        {
+          this.state.showAddNew && <button type="button" className="btn btn-form btn-negative pull-left" onClick={() => { this.handleDeleteItem(this.state.currentEdit) }}>Delete</button>
+        }
+        {
+          this.state.showAddNew && <button type="button" className="btn btn-form btn-default pull-right" onClick={() => { this.renderEmptyForm() }}>Add New Item</button>
+        }
       </div>
       <br/>
       </form>
