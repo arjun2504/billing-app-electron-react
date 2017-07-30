@@ -115,7 +115,7 @@
     if (isTabGroup.success) {
       var isAddBtn = hasParentClass(event.target, "btn-add-tab");
       if (isAddBtn.success) {
-        group.addTab({});
+        //group.addTab({});
       }
     }
   });
@@ -267,16 +267,19 @@
   }
   hasParentClass = function(currParent, className) {
     var parents = [];
-    while (currParent.tagName != undefined) {
-      parents.push(currParent);
-      if (currParent.classList.contains(className)) {
-        return {
-          success: true,
-          parents: parents
+    if(!currParent) {
+      while (currParent.tagName != undefined) {
+        parents.push(currParent);
+        if (currParent.classList.contains(className)) {
+          return {
+            success: true,
+            parents: parents
+          }
         }
+        currParent = currParent.parentNode;
       }
-      currParent = currParent.parentNode;
     }
+
     return {
       success: false,
       parents: parents

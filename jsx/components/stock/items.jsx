@@ -4,6 +4,7 @@ var React = require('react');
 var PageCard = require('../PageCard.jsx');
 var api = require('electron').remote.getGlobal('sharedObj').api;
 var $ = require('jquery');
+var classNames = require('classnames');
 
 class Item extends React.Component
 {
@@ -93,7 +94,10 @@ class Item extends React.Component
 
   handleAddItem(e) {
     e.preventDefault();
-
+    if(e.target.mode.value == "edit") {
+      document.getElementById('item_id').value = e.target.item_id.value;
+      document.getElementById('mode').value = 'edit';
+    }
     this.state.formdata.product_code = e.target.product_code.value;
     this.state.formdata.product_name = e.target.product_name.value;
     this.state.formdata.price = e.target.price.value;
@@ -117,6 +121,7 @@ class Item extends React.Component
         this.getData();
       }
     });
+
   }
 
   handleChange(e) {
@@ -215,7 +220,7 @@ class Item extends React.Component
               if(v.name == 'mode')
                 field = <input type="hidden" name={v.name} id={v.name} value="add"/>;
               else
-                field = <input type="hidden" name={v.name} id={v.name} value="edit"/>;
+                field = <input type="hidden" name={v.name} id={v.name} value={v.id}/>;
               break;
           }
 
@@ -259,9 +264,11 @@ class Item extends React.Component
                 this.state.items.map(function(v, i) {
                   let availability
                   availability = (v.is_available == 1) ? "In Stock" : "Out of Stock";
-
+                  var activeRow = classNames({
+                    currentrow: this.state.currentEdit == v.id
+                  });
                   return(
-                    <tr key={v.id} onClick={() => { this.handleRowSelect(v.id) } } id={'row-' + v.id}>
+                    <tr key={v.id} className={activeRow} onClick={() => { this.handleRowSelect(v.id) } } id={'row-' + v.id}>
                       <td>{v.product_code}</td>
                       <td>{v.product_name}</td>
                       <td>{v.price}</td>

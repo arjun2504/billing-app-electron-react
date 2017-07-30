@@ -79,3 +79,22 @@
   border-width: 1px 0 0 0;
   border-top-color: #f3f3f3;
 }
+.addnewrow {
+  background-color: cornsilk !important;
+}
+.addnewrow td {
+  font-size: 15px;
+  padding: 11px;
+  text-align: center;
+}
+.currentrow {
+  color: #fff;
+  background-color: #116cd6 !important;
+}
+tr:active {
+  color: inherit;
+  background-color: inherit;
+}
+.removerow {
+  color: red;
+}
