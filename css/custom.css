@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "open-sans-light";
+  src: url("../fonts/OpenSans-Light.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 .noselectmenu {
   height: 100%;
   text-align: center;
@@ -97,4 +103,23 @@ tr:active {
 }
 .removerow {
   color: red;
+}
+.empty-invoice-container {
+  padding: 30px;
+  text-align: center;
+  font-family: 'open-sans-light';
+}
+.center-empty-icon {
+  margin-top: 100px;
+}
+.empty-invoice-container h1 {
+  font-size: 30px;
+}
+.empty-invoice-container p {
+  font-size: 15px;
+}
+.transparent-btn {
+  background-color: transparent;
+  border-color: transparent;
+  width: 100%;
 }

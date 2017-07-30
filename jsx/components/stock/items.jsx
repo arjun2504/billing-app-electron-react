@@ -19,6 +19,8 @@ class Item extends React.Component
   constructor(props) {
       super(props);
       this.state = {
+        'mode': 'add',
+        'currentEdit': -1,
         'showAddNew': false,
         'buttonLabel': 'Add',
         'formtitle': 'Add to Stock',
@@ -62,15 +64,15 @@ class Item extends React.Component
                 'value': 0
               }
             ]
-          },
-          {
-            'name': 'mode',
-            'type': 'hidden'
-          },
-          {
-            'name': 'item_id',
-            'type': 'hidden'
           }
+          // {
+          //   'name': 'mode',
+          //   'type': 'hidden'
+          // },
+          // {
+          //   'name': 'item_id',
+          //   'type': 'hidden'
+          // }
         ]
       }
       this.handleChange = this.handleChange.bind(this);
@@ -94,10 +96,7 @@ class Item extends React.Component
 
   handleAddItem(e) {
     e.preventDefault();
-    if(e.target.mode.value == "edit") {
-      document.getElementById('item_id').value = e.target.item_id.value;
-      document.getElementById('mode').value = 'edit';
-    }
+
     this.state.formdata.product_code = e.target.product_code.value;
     this.state.formdata.product_name = e.target.product_name.value;
     this.state.formdata.price = e.target.price.value;
@@ -105,7 +104,7 @@ class Item extends React.Component
     let route;
     route = "stock/add";
 
-    route = (e.target.mode.value == "add") ? "stock/add" : "stock/update/" + e.target.item_id.value;
+    route = (this.state.mode == "add") ? "stock/add" : "stock/update/" + this.state.currentEdit;
 
     fetch(api + route, {
       method: 'POST',
@@ -135,12 +134,12 @@ class Item extends React.Component
 
       var fdata = this.formdata(json.product_code, json.product_name, json.price, json.is_available);
       //console.log(fdata);
-      this.setState({ 'formtitle': 'Edit ' + json.product_name, 'buttonLabel': 'Update', 'formdata': fdata, 'showAddNew': true, 'currentEdit': itemId });
+      this.setState({ 'formtitle': 'Edit ' + json.product_name, 'buttonLabel': 'Update', 'formdata': fdata, 'showAddNew': true, 'currentEdit': itemId, 'mode': 'edit' });
       document.getElementById('product_code').value = json.product_code;
       document.getElementById('product_name').value = json.product_name;
       document.getElementById('price').value = json.price;
-      document.getElementById('item_id').value = json.id;
-      document.getElementById('mode').value = 'edit';
+      // document.getElementById('item_id').value = json.id;
+      // document.getElementById('mode').value = 'edit';
       if(json.is_available == 1) {
         document.getElementById('is_available').options[1].selected = true;
       } else {
@@ -168,12 +167,11 @@ class Item extends React.Component
   }
 
   renderEmptyForm() {
-    this.setState({ 'formtitle': 'Add to Stock', 'buttonLabel': 'Add', 'formdata': this.formdata(), 'showAddNew': false, 'currentEdit': -1 });
+    this.setState({ 'formtitle': 'Add to Stock', 'buttonLabel': 'Add', 'formdata': this.formdata(), 'showAddNew': false, 'currentEdit': -1, 'mode': 'add' });
     document.getElementById('product_code').value = '';
     document.getElementById('product_name').value = '';
     document.getElementById('price').value = '';
     document.getElementById('is_available').options[0].selected = true;
-    document.getElementById('mode').value = 'add';
     this.renderForm();
   }
 
@@ -216,12 +214,12 @@ class Item extends React.Component
                           </select>
                         </div>;
               break;
-            case 'hidden':
-              if(v.name == 'mode')
-                field = <input type="hidden" name={v.name} id={v.name} value="add"/>;
-              else
-                field = <input type="hidden" name={v.name} id={v.name} value={v.id}/>;
-              break;
+            // case 'hidden':
+            //   if(v.name == 'mode')
+            //     field = <input type="hidden" name={v.name} id={v.name} value="add"/>;
+            //   else
+            //     field = <input type="hidden" name={v.name} id={v.name} value={v.id}/>;
+            //   break;
           }
 
           return(
