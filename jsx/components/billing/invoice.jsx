@@ -4,6 +4,10 @@ var React = require('react');
 var PageCard = require('../PageCard.jsx');
 var classNames = require('classnames');
 var $ = require('jquery');
+var api = require('electron').remote.getGlobal('sharedObj').api;
+var Select = require('react-select');
+var pcodes = [];
+//require('react-select/dist/react-select.css');
 
 Array.prototype.removeValue = function(name, value){
    var array = $.map(this, function(v,i){
@@ -34,7 +38,8 @@ class Invoice extends React.Component
               'product_name': '',
               'rate': '',
               'meters': '',
-              'quantity': ''
+              'quantity': '',
+              'amount': 0
             }
           ],
           'total': 0,
@@ -51,7 +56,8 @@ class Invoice extends React.Component
             'product_name': '',
             'rate': '',
             'meters': '',
-            'quantity': ''
+            'quantity': '',
+            'amount': 0
           }
         )
   }
@@ -61,10 +67,12 @@ class Invoice extends React.Component
 
     if(localStorage.getItem('state') == null) {
       this.state = {
+        'fetched_products': [],
         'activeTabLock': false,
         'active_invoice': 1,
         'next_bid': 2,
-        'invoices': []
+        'invoices': [],
+        'pcodes_only': [],
       };
       this.state.invoices.push(this.getBlankInvoice());
     } else {
@@ -78,6 +86,12 @@ class Invoice extends React.Component
     this.handleNewRow = this.handleNewRow.bind(this);
     this.handleRemoveRow = this.handleRemoveRow.bind(this);
     this.handleTabPress = this.handleTabPress.bind(this);
+    this.fetchProducts = this.fetchProducts.bind(this);
+    this.allProductCodes = this.allProductCodes.bind(this);
+    this.handleSetProduct = this.handleSetProduct.bind(this);
+
+    this.fetchProducts();
+    pcodes = this.allProductCodes();
     /*
     {
       'bill_num': 1,
@@ -88,6 +102,15 @@ class Invoice extends React.Component
 
   ComponentDidMount() {
 
+  }
+
+  fetchProducts() {
+    fetch(api + "stock/all?stock=1").then((response) => { return response.json() }).then((json) => {
+      this.setState({ 'fetched_products': json }, () => {
+        this.setState({'pcodes_only':pcodes});
+        localStorage.setItem('state', JSON.stringify(this.state));
+      });
+    });
   }
 
   handleNewInvoice(e) {
@@ -198,9 +221,27 @@ class Invoice extends React.Component
   }
 
   handleTabPress(e, productIndex, invoiceIndex) {
-    if(e.keyCode == 9 && this.state.invoices[invoiceIndex].products.length-1 == productIndex) {
+    if(!e.shiftKey && e.keyCode == 9 && this.state.invoices[invoiceIndex].products.length-1 == productIndex) {
       this.handleNewRow();
     }
+  }
+
+  allProductCodes() {
+    var codes = [];
+    this.state.fetched_products.map(function(k,i) {
+      codes.push({ 'value': k.product_code, 'label': k.product_name });
+    });
+    return codes;
+  }
+  handleSelectCode() {
+
+  }
+
+  handleSetProduct(val, productIndex, invoiceIndex) {
+    this.state.invoices[invoiceIndex].products[productIndex].product_name = val.label;
+    this.state.invoices[invoiceIndex].products[productIndex].product_code = val.value;
+    this.forceUpdate();
+    localStorage.setItem('state', JSON.stringify(this.state));
   }
 
   render() {
@@ -253,17 +294,25 @@ class Invoice extends React.Component
                       var iterate = 0;
                       return v.products.map(function(pk, pv) {
                         iterate++;
+                        var total = pk.meters * pk.quantity * pk.rate;
                         return(
                           <tr>
                             <td>{iterate}</td>
+                            <td>{pk.product_code}</td>
                             <td>
-                              <input type="number" className="form-control" name={'pcode-' + iterate} value={pk.product_code} onChange={this.handleRow} />
+                              <Select
+                                  name={'pcode-' + iterate}
+                                  options={this.state.pcodes_only}
+                                  clearable={false}
+                                  onChange={(value) => { this.handleSetProduct(value,pv,i)}}
+                                  placeholder=""
+                                  value={pk.product_code}
+                              />
                             </td>
-                            <td>{pk.product_name}</td>
-                            <td><input type="number" className="form-control" name={'rate-' + iterate} value={pk.rate} onChange={this.handleRow}/></td>
+                            <td><input type="number" className="form-control" name={'meters-' + iterate} value={pk.meters} onChange={this.handleRow}/></td>
                             <td><input type="number" className="form-control" name={'quantity-' + iterate} value={pk.quantity} onChange={this.handleRow}/></td>
                             <td><input type="number" className="form-control" name={'rate-' + iterate} value={pk.rate} onChange={this.handleRow} onKeyDown={(e) => { this.handleTabPress(e, pv, i) }} /></td>
-                            <td>60</td>
+                            <td>{total}</td>
                             <td className="removerow"><span className="icon icon-cancel-circled" onClick={ () => { this.handleRemoveRow(pv) } }></span></td>
                           </tr>
                         )

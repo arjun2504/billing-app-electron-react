@@ -123,3 +123,45 @@ tr:active {
   border-color: transparent;
   width: 100%;
 }
+.transparent-btn:focus {
+  outline: none;
+}
+/*.Select-menu-outer {
+  z-index: 999 !important;
+  position: relative;
+}*/
+/*.Select.is-open { position: relative; z-index: 1000; }*/
+.Select-menu {
+    position: fixed !important;
+}
+.Select {
+    width: 222px !important;
+    z-index: 0 !important;
+}
+
+.Select.is-open {
+	z-index: 1 !important;
+  background-color: #fff;
+}
+
+.Select-menu {
+    position: fixed !important;
+    width: 220px !important;
+    margin: 1px;
+    border-color: #000 !important;
+}
+.Select-menu-outer {
+  opacity: 1 !important;
+  border: 1px solid #000 !important;
+}
+.Select-option {
+  z-index: 2 !important;
+  background-color: #fff;
+}
+.Select-option.is-focused {
+  background-color: rgba(0,126,255,1) !important;
+  color: #fff;
+}
+.Select-option.is-selected {
+  background-color: rgb(211, 233, 255);
+}

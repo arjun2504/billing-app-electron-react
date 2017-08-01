@@ -6,5 +6,8 @@
   "scripts": {
     "start": "electron ."
   },
-  "author": "Arjun"
+  "author": "Arjun",
+  "dependencies": {
+    "react-select": "^1.0.0-rc.5"
+  }
 }
