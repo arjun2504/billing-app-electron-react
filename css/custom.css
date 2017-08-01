@@ -147,12 +147,12 @@ tr:active {
 .Select-menu {
     position: fixed !important;
     width: 220px !important;
+    background-color: #fdfdfd;
     margin: 1px;
     border-color: #000 !important;
 }
 .Select-menu-outer {
   opacity: 1 !important;
-  border: 1px solid #000 !important;
 }
 .Select-option {
   z-index: 2 !important;

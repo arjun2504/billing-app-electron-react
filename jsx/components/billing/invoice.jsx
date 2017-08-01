@@ -147,9 +147,11 @@ class Invoice extends React.Component
           nextActive = this.state.invoices[0].bid;
         this.setState({ 'activeTabLock': true }, () => {
           this.setState({ 'active_invoice': nextActive });
+          this.forceUpdate();
           console.log(nextActive);
           setTimeout(function() {
             this.setState({ 'activeTabLock': false });
+            this.forceUpdate();
           }.bind(this),500);
         });
       }
@@ -159,12 +161,11 @@ class Invoice extends React.Component
 
   handleActiveInvoice(billno) {
     if(!this.state.activeTabLock) {
-      this.setState({ 'active_invoice': billno });
-      console.log('is closed' + billno + " " + this.state.active_invoice);
-      this.forceUpdate();
-      localStorage.setItem('state', JSON.stringify(this.state));
+      this.setState({ 'active_invoice': billno }, () => {
+        this.forceUpdate();
+        localStorage.setItem('state', JSON.stringify(this.state));
+      });
     }
-    //});
   }
 
   handleRow(e) {
