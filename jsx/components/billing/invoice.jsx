@@ -90,6 +90,8 @@ class Invoice extends React.Component
     this.fetchProducts = this.fetchProducts.bind(this);
     this.allProductCodes = this.allProductCodes.bind(this);
     this.handleSetProduct = this.handleSetProduct.bind(this);
+    this.getProductAmount = this.getProductAmount.bind(this);
+    this.getInvoiceTotal = this.getInvoiceTotal.bind(this);
 
     this.fetchProducts();
     pcodes = this.allProductCodes();
@@ -247,6 +249,31 @@ class Invoice extends React.Component
     localStorage.setItem('state', JSON.stringify(this.state));
   }
 
+  getProductAmount(invoiceIndex,productIndex, pk) {
+    var total = 0;
+    if(pk.meters == "") {
+      total = pk.quantity * pk.rate;
+      this.state.invoices[invoiceIndex].products[productIndex].amount = total;
+      return total;
+    }
+
+    total = pk.meters * pk.quantity * pk.rate;
+    this.state.invoices[invoiceIndex].products[productIndex].amount = total;
+    return total;
+  }
+
+  getInvoiceTotal() {
+    var invoiceTotal = 0;
+    this.state.invoices.map(function(v,i) {
+      if(v.bid == this.state.active_invoice) {
+        v.products.map(function(kv,ki) {
+          invoiceTotal += kv.amount;
+        });
+      }
+    }.bind(this));
+    return invoiceTotal;
+  }
+
   render() {
     var dragStyle ={
       'WebkitAppRegion': 'drag'
@@ -286,7 +313,7 @@ class Invoice extends React.Component
                     <th>Meters</th>
                     <th>Quantity</th>
                     <th>Rate</th>
-                    <th>Amount</th>
+                    <th>Amount ₹</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -297,7 +324,7 @@ class Invoice extends React.Component
                       var iterate = 0;
                       return v.products.map(function(pk, pv) {
                         iterate++;
-                        var total = pk.meters * pk.quantity * pk.rate;
+                        var total = this.getProductAmount(i, pv, pk);
                         return(
                           <tr>
                             <td>{iterate}</td>
@@ -322,7 +349,7 @@ class Invoice extends React.Component
                                       transitionProperty:
                                           'background-color, color, opacity'
                                   }}
-                                  
+
                                   duration={200}
                                   formatValue={(n) => { return parseInt(n); }}/>
                             </td>
@@ -341,7 +368,17 @@ class Invoice extends React.Component
                 </tbody>
               </table>
             </div>
-            <div className="total-content"></div>
+            <div className="total-content">
+              <AnimatedNumber component="text" value={this.getInvoiceTotal()}
+                  style={{
+                      transition: '0.8s ease-out',
+                      transitionProperty:
+                          'background-color, color, opacity'
+                  }}
+
+                  duration={200}
+                  formatValue={(n) => { return parseInt(n); }} />
+            </div>
           </div>
           </div>
         }
