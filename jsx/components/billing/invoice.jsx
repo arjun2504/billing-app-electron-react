@@ -40,12 +40,13 @@ class Invoice extends React.Component
               'rate': '',
               'meters': '',
               'quantity': '',
-              'amount': 0
+              'amount': 0,
+              'amount_gst': 0
             }
           ],
           'total': 0,
-          'cst': 2.5,
-          'gst': 2.5
+          'total_gst': 0,
+          'total_roff': 0
         }
       )
   }
@@ -58,7 +59,8 @@ class Invoice extends React.Component
             'rate': '',
             'meters': '',
             'quantity': '',
-            'amount': 0
+            'amount': 0,
+            'amount_gst': 0
           }
         )
   }
@@ -74,6 +76,8 @@ class Invoice extends React.Component
         'next_bid': 2,
         'invoices': [],
         'pcodes_only': [],
+        'cgst': 2.5,
+        'sgst': 2.5
       };
       this.state.invoices.push(this.getBlankInvoice());
     } else {
@@ -242,36 +246,41 @@ class Invoice extends React.Component
 
   }
 
-  handleSetProduct(val, productIndex, invoiceIndex) {
-    this.state.invoices[invoiceIndex].products[productIndex].product_name = val.label;
-    this.state.invoices[invoiceIndex].products[productIndex].product_code = val.value;
+  handleSetProduct(val, pk) {
+    pk.product_name = val.label;
+    pk.product_code = val.value;
     this.forceUpdate();
     localStorage.setItem('state', JSON.stringify(this.state));
   }
 
-  getProductAmount(invoiceIndex,productIndex, pk) {
-    var total = 0;
-    if(pk.meters == "") {
-      total = pk.quantity * pk.rate;
-      this.state.invoices[invoiceIndex].products[productIndex].amount = total;
-      return total;
-    }
-
-    total = pk.meters * pk.quantity * pk.rate;
-    this.state.invoices[invoiceIndex].products[productIndex].amount = total;
-    return total;
+  getProductAmount(pk) {
+    var total = 0, total_gst = 0;
+    var meters = ((pk.meters+"").trim() == "") ? 1 : pk.meters;
+    total = meters * pk.quantity * pk.rate;
+    total_gst = ( ( ( ( this.state.cgst + this.state.sgst ) / 100 ) * total ) + total);
+    pk.amount = total;
+    pk.amount_gst = total_gst;
+    return total_gst;
   }
 
   getInvoiceTotal() {
     var invoiceTotal = 0;
+    var invoiceTotalGst = 0;
+    var roundOff = 0;
     this.state.invoices.map(function(v,i) {
       if(v.bid == this.state.active_invoice) {
         v.products.map(function(kv,ki) {
-          invoiceTotal += kv.amount;
-        });
+          invoiceTotal += kv.amount_gst;
+          v.total = invoiceTotal;
+          v.total_gst = ( ( ( ( this.state.cgst + this.state.sgst ) / 100 ) * v.total ) + v.total );
+          invoiceTotalGst = v.total_gst;
+          v.total_roff = Math.round(v.total_gst);
+          roundOff = v.total_roff;
+        }.bind(this));
       }
     }.bind(this));
-    return invoiceTotal;
+
+    return roundOff;
   }
 
   render() {
@@ -279,11 +288,11 @@ class Invoice extends React.Component
       'WebkitAppRegion': 'drag'
     };
     return(
+      <div>
       <div className="content-area">
         <PageCard icon="icon-basket" title="Create Invoice" description="Add products that are being purchased and create invoice" />
         {
           this.state.invoices.length > 0 &&
-          <div>
           <div className="tab-group" id="my-tab-group-1">
               {
                 this.state.invoices.map(function(v,i) {
@@ -302,85 +311,6 @@ class Invoice extends React.Component
               }
               <div className="tab-item tab-item-fixed btn btn-add-tab" onClick={this.handleNewInvoice}></div>
           </div>
-          <div id="tab-panel">
-            <div className="tab-content" name="bill-1">
-              <table className="table-striped custom-invoice-pane">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Meters</th>
-                    <th>Quantity</th>
-                    <th>Rate</th>
-                    <th>Amount ₹</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                {
-                  this.state.invoices.map(function(v, i) {
-                    if(v.bid == this.state.active_invoice) {
-                      var iterate = 0;
-                      return v.products.map(function(pk, pv) {
-                        iterate++;
-                        var total = this.getProductAmount(i, pv, pk);
-                        return(
-                          <tr>
-                            <td>{iterate}</td>
-                            <td>{pk.product_code}</td>
-                            <td>
-                              <Select
-                                  name={'pcode-' + iterate}
-                                  options={this.state.pcodes_only}
-                                  clearable={false}
-                                  onChange={(value) => { this.handleSetProduct(value,pv,i)}}
-                                  placeholder=""
-                                  value={pk.product_code}
-                              />
-                            </td>
-                            <td><input type="number" className="form-control" name={'meters-' + iterate} value={pk.meters} onChange={this.handleRow}/></td>
-                            <td><input type="number" className="form-control" name={'quantity-' + iterate} value={pk.quantity} onChange={this.handleRow}/></td>
-                            <td><input type="number" className="form-control" name={'rate-' + iterate} value={pk.rate} onChange={this.handleRow} onKeyDown={(e) => { this.handleTabPress(e, pv, i) }} /></td>
-                            <td>
-                            <AnimatedNumber component="text" value={total}
-                                  style={{
-                                      transition: '0.8s ease-out',
-                                      transitionProperty:
-                                          'background-color, color, opacity'
-                                  }}
-
-                                  duration={200}
-                                  formatValue={(n) => { return parseInt(n); }}/>
-                            </td>
-                            <td className="removerow"><span className="icon icon-cancel-circled" onClick={ () => { this.handleRemoveRow(pv) } }></span></td>
-                          </tr>
-                        )
-                      }.bind(this))
-                    }
-                  }.bind(this))
-                }
-                <tr className="addnewrow">
-                  <td colSpan="8">
-                    <button className="transparent-btn" onClick={this.handleNewRow}><span className="icon icon-plus"></span> Add New Row</button>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-            <div className="total-content">
-              <AnimatedNumber component="text" value={this.getInvoiceTotal()}
-                  style={{
-                      transition: '0.8s ease-out',
-                      transitionProperty:
-                          'background-color, color, opacity'
-                  }}
-
-                  duration={200}
-                  formatValue={(n) => { return parseInt(n); }} />
-            </div>
-          </div>
-          </div>
         }
         {
           this.state.invoices.length == 0 &&
@@ -391,6 +321,91 @@ class Invoice extends React.Component
             <button type="button" className="btn btn-large btn-positive" onClick={this.handleNewInvoice}>Create Invoice</button>
           </div>
         }
+    </div>
+    {
+      this.state.invoices.length > 0 &&
+      <div className="table-area">
+      <div id="tab-panel">
+        <div className="tab-content" name="bill-1">
+          <table className="table-striped custom-invoice-pane">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Meters</th>
+                <th>Quantity</th>
+                <th>Rate</th>
+                <th>Amount ₹</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+            {
+              this.state.invoices.map(function(v, i) {
+                if(v.bid == this.state.active_invoice) {
+                  var iterate = 0;
+                  return v.products.map(function(pk, pv) {
+                    iterate++;
+                    var total = this.getProductAmount(pk);
+                    return(
+                      <tr>
+                        <td>{iterate}</td>
+                        <td>{pk.product_code}</td>
+                        <td>
+                          <Select
+                              name={'pcode-' + iterate}
+                              options={this.state.pcodes_only}
+                              clearable={false}
+                              onChange={(value) => { this.handleSetProduct(value, pk)}}
+                              placeholder=""
+                              value={pk.product_code}
+                          />
+                        </td>
+                        <td><input type="number" className="form-control" name={'meters-' + iterate} value={pk.meters} onChange={this.handleRow}/></td>
+                        <td><input type="number" className="form-control" name={'quantity-' + iterate} value={pk.quantity} onChange={this.handleRow}/></td>
+                        <td><input type="number" className="form-control" name={'rate-' + iterate} value={pk.rate} onChange={this.handleRow} onKeyDown={(e) => { this.handleTabPress(e, pv, i) }} /></td>
+                        <td className="text-right-align">
+                        <AnimatedNumber component="text" value={total}
+                              style={{
+                                  transition: '0.8s ease-out',
+                                  transitionProperty:
+                                      'background-color, color, opacity'
+                              }}
+
+                              duration={200}
+                              formatValue={(n) => { return parseFloat(n).toFixed(2); }}/>
+                        </td>
+                        <td className="removerow"><span className="icon icon-cancel-circled" onClick={ () => { this.handleRemoveRow(pv) } }></span></td>
+                      </tr>
+                    )
+                  }.bind(this))
+                }
+              }.bind(this))
+            }
+            <tr className="addnewrow">
+              <td colSpan="8">
+                <button className="transparent-btn" onClick={this.handleNewRow}><span className="icon icon-plus"></span> Add New Row</button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      </div>
+    }
+    <div className="total-content pull-right">
+      <AnimatedNumber component="text" value={this.getInvoiceTotal()}
+          style={{
+              transition: '0.8s ease-out',
+              transitionProperty:
+                  'background-color, color, opacity'
+          }}
+          duration={200}
+          formatValue={(n) => { return parseFloat(n).toFixed(2); }} />
+    </div>
     </div>
     )
   }

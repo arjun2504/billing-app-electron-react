@@ -13,6 +13,7 @@
 }
 .content-area {
   /*padding: 20px 30px;*/
+  height: calc(100% - 200px);
 }
 .icon-area {
   font-size: 50px;
@@ -68,7 +69,6 @@
 .tab-content {
   width:100%;
   max-height: inherit;
-  overflow: scroll;
 }
 .custom-invoice-pane {
   padding: 1px 0px;
@@ -165,4 +165,17 @@ tr:active {
 }
 .Select-option.is-selected {
   background-color: rgb(211, 233, 255);
+}
+.total-content {
+  padding: 0px 20px;
+  font-size: 80px;
+  font-weight: bold;
+  width: calc(100% - 152px);
+  text-align: right;
+}
+.text-right-align {
+  text-align: right;
+}
+.table-area {
+  overflow-y: auto;
 }
