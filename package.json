@@ -8,6 +8,7 @@
   },
   "author": "Arjun",
   "dependencies": {
+    "react-animated-number": "^0.4.3",
     "react-select": "^1.0.0-rc.5"
   }
 }

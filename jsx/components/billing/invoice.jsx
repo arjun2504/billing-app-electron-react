@@ -7,6 +7,7 @@ var $ = require('jquery');
 var api = require('electron').remote.getGlobal('sharedObj').api;
 var Select = require('react-select');
 var pcodes = [];
+var AnimatedNumber = require('react-animated-number');
 //require('react-select/dist/react-select.css');
 
 Array.prototype.removeValue = function(name, value){
@@ -108,6 +109,7 @@ class Invoice extends React.Component
     fetch(api + "stock/all?stock=1").then((response) => { return response.json() }).then((json) => {
       this.setState({ 'fetched_products': json }, () => {
         this.setState({'pcodes_only':pcodes});
+        this.forceUpdate();
         localStorage.setItem('state', JSON.stringify(this.state));
       });
     });
@@ -313,7 +315,17 @@ class Invoice extends React.Component
                             <td><input type="number" className="form-control" name={'meters-' + iterate} value={pk.meters} onChange={this.handleRow}/></td>
                             <td><input type="number" className="form-control" name={'quantity-' + iterate} value={pk.quantity} onChange={this.handleRow}/></td>
                             <td><input type="number" className="form-control" name={'rate-' + iterate} value={pk.rate} onChange={this.handleRow} onKeyDown={(e) => { this.handleTabPress(e, pv, i) }} /></td>
-                            <td>{total}</td>
+                            <td>
+                            <AnimatedNumber component="text" value={total}
+                                  style={{
+                                      transition: '0.8s ease-out',
+                                      transitionProperty:
+                                          'background-color, color, opacity'
+                                  }}
+                                  
+                                  duration={200}
+                                  formatValue={(n) => { return parseInt(n); }}/>
+                            </td>
                             <td className="removerow"><span className="icon icon-cancel-circled" onClick={ () => { this.handleRemoveRow(pv) } }></span></td>
                           </tr>
                         )

@@ -149,7 +149,8 @@ tr:active {
     width: 220px !important;
     background-color: #fdfdfd;
     margin: 1px;
-    border-color: #000 !important;
+    border: 1px #a5a3a5 solid;
+    border-color: #a5a3a5 !important;
 }
 .Select-menu-outer {
   opacity: 1 !important;
