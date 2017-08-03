@@ -78,7 +78,7 @@
 .total-content {
   bottom: 22px;
   position: fixed;
-  height: 200px;
+  height: 220px;
   width: 100%;
   background-color: #fff;
   border-style: solid;
@@ -168,8 +168,6 @@ tr:active {
 }
 .total-content {
   padding: 0px 20px;
-  font-size: 80px;
-  font-weight: bold;
   width: calc(100% - 152px);
   text-align: right;
 }
@@ -178,4 +176,34 @@ tr:active {
 }
 .table-area {
   overflow-y: auto;
+}
+.total-sm text, .total-lg text {
+  padding: 0px;
+}
+.total-sm {
+  font-size: 20px;
+  padding-right: 5px;
+}
+.total-md {
+  font-size: 30px;
+}
+.total-lg {
+  font-size: 40px;
+  font-weight: bold;
+}
+.total-table {
+  float: right;
+  width: 100px;
+}
+.total-rf-table {
+  clear:both;
+  float: right;
+  width: 100px;
+}
+.total-table tr {
+  width: 100px;
+}
+.total-table tr td {
+  text-align: right;
+  padding: 0px 10px;
 }

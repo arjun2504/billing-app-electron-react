@@ -263,7 +263,7 @@ class Invoice extends React.Component
     return total_gst;
   }
 
-  getInvoiceTotal() {
+  getInvoiceTotal(type = null) {
     var invoiceTotal = 0;
     var invoiceTotalGst = 0;
     var roundOff = 0;
@@ -280,7 +280,13 @@ class Invoice extends React.Component
       }
     }.bind(this));
 
-    return roundOff;
+    if(type == 'round')
+      return roundOff;
+    else if(type == 'gst')
+      return invoiceTotalGst;
+    else {
+      return invoiceTotal;
+    }
   }
 
   render() {
@@ -397,14 +403,51 @@ class Invoice extends React.Component
       </div>
     }
     <div className="total-content pull-right">
-      <AnimatedNumber component="text" value={this.getInvoiceTotal()}
-          style={{
-              transition: '0.8s ease-out',
-              transitionProperty:
-                  'background-color, color, opacity'
-          }}
-          duration={200}
-          formatValue={(n) => { return parseFloat(n).toFixed(2); }} />
+        <table className="total-table">
+          <tbody>
+            <tr>
+              <td>Sale:</td>
+              <td className="total-sm">₹ <AnimatedNumber component="text" value={this.getInvoiceTotal()}
+                  style={{
+                      transition: '0.8s ease-out',
+                      transitionProperty:
+                          'background-color, color, opacity'
+                  }}
+                  duration={200}
+                  formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></td>
+            </tr>
+            <tr>
+              <td>CGST:</td>
+              <td className="total-sm">{this.state.cgst}%</td>
+            </tr>
+            <tr>
+              <td>SGST:</td>
+              <td className="total-sm">{this.state.sgst}%</td>
+            </tr>
+            <tr>
+              <td>Total Amount:</td>
+              <td className="total-sm">₹ <AnimatedNumber component="text" value={this.getInvoiceTotal('gst')}
+                  style={{
+                      transition: '0.8s ease-out',
+                      transitionProperty:
+                          'background-color, color, opacity'
+                  }}
+                  duration={200}
+                  formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></td>
+            </tr>
+            </tbody>
+        </table>
+        <table className="total-rf-table">
+          <tbody>
+            <tr>
+              <td className="total-md">₹</td>
+              <td className="total-lg">
+              <AnimatedNumber component="text" value={this.getInvoiceTotal('round')} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity' }} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      <span className="total-lg"></span>
     </div>
     </div>
     )
