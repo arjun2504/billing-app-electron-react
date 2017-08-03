@@ -10,12 +10,18 @@ class Sidebar extends React.Component
     this.state = {
       'active': null,
       'items': {
-        'Billing': [
+        'Invoice': [
           {
             'name': 'invoice',
             'title': 'Invoice',
             'icon': 'icon icon-basket',
             'component': require('./billing/invoice.jsx')
+          },
+          {
+            'name': 'history',
+            'title': 'History',
+            'icon': 'icon icon-ccw',
+            'component': require('./billing/history.jsx')
           }
         ],
         'Stock': [
@@ -27,6 +33,12 @@ class Sidebar extends React.Component
           }
         ],
         'Settings': [
+          {
+            'name': 'general',
+            'title': 'General',
+            'icon': 'icon icon-cog',
+            'component': require('./settings/general.jsx')
+          },
           {
             'name': 'template',
             'title': 'Bill Template',

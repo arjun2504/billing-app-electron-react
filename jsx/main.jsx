@@ -24,7 +24,6 @@ var App = React.createClass(
   render: function() {
     return(
       <div className="window">
-        <Navigation />
         <div className="window-content">
           <div className="pane-group">
             <Sidebar changeComponent={this.changeComponent}/>

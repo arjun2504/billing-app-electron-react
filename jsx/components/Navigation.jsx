@@ -7,28 +7,15 @@ class Header extends React.Component
   render() {
     return(
       <header className="toolbar toolbar-header">
-      <div className="toolbar-actions">
-        <div className="btn-group">
-          <button className="btn btn-default">
-            <span className="icon icon-home"></span>
-          </button>
-          <button className="btn btn-default">
-            <span className="icon icon-folder"></span>
-          </button>
-          <button className="btn btn-default active">
-            <span className="icon icon-cloud"></span>
-          </button>
-          <button className="btn btn-default">
-            <span className="icon icon-popup"></span>
-          </button>
-          <button className="btn btn-default">
-            <span className="icon icon-shuffle"></span>
-          </button>
+      <div className="toolbar-actions toolbar-actions-custom">
+        <div className="filter-controls">
+          <input type="text" className="form-control" placeholder="Invoice #" />
         </div>
 
+
         <button className="btn btn-default">
-          <span className="icon icon-home icon-text"></span>
-          Filters
+          <span className="icon icon-trash icon-text"></span>
+          Clear All
         </button>
 
         <button className="btn btn-default btn-dropdown pull-right">

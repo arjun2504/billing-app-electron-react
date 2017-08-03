@@ -78,7 +78,7 @@
 .total-content {
   bottom: 22px;
   position: fixed;
-  height: 220px;
+  height: 90px;
   width: 100%;
   background-color: #fff;
   border-style: solid;
@@ -180,16 +180,22 @@ tr:active {
 .total-sm text, .total-lg text {
   padding: 0px;
 }
-.total-sm {
-  font-size: 20px;
+.total-sm span {
+  font-size: 18px;
   padding-right: 5px;
+  text-align: right;
+  clear: both;
 }
 .total-md {
   font-size: 30px;
 }
-.total-lg {
+.total-lg span {
   font-size: 40px;
+  padding-right: 5px;
+  text-align: right;
+  clear: both;
   font-weight: bold;
+  color: #256f01;
 }
 .total-table {
   float: right;
@@ -206,4 +212,23 @@ tr:active {
 .total-table tr td {
   text-align: right;
   padding: 0px 10px;
+}
+.bill-btn {
+  width: 75px;
+  font-weight: bold;
+}
+.toolbar-actions-custom {
+  padding: 10px;
+}
+.filter-controls input[type="text"] {
+  width: 150px;
+  float: left;
+  height: 20px;
+}
+.history-controls {
+  width: 150px;
+  text-align:center;
+}
+.history-controls .btn .icon {
+  color: #fff;
 }

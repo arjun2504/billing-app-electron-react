@@ -406,46 +406,26 @@ class Invoice extends React.Component
         <table className="total-table">
           <tbody>
             <tr>
-              <td>Sale:</td>
-              <td className="total-sm">₹ <AnimatedNumber component="text" value={this.getInvoiceTotal()}
-                  style={{
-                      transition: '0.8s ease-out',
-                      transitionProperty:
-                          'background-color, color, opacity'
-                  }}
-                  duration={200}
-                  formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></td>
-            </tr>
-            <tr>
-              <td>CGST:</td>
-              <td className="total-sm">{this.state.cgst}%</td>
-            </tr>
-            <tr>
-              <td>SGST:</td>
-              <td className="total-sm">{this.state.sgst}%</td>
-            </tr>
-            <tr>
-              <td>Total Amount:</td>
-              <td className="total-sm">₹ <AnimatedNumber component="text" value={this.getInvoiceTotal('gst')}
-                  style={{
-                      transition: '0.8s ease-out',
-                      transitionProperty:
-                          'background-color, color, opacity'
-                  }}
-                  duration={200}
-                  formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></td>
-            </tr>
-            </tbody>
-        </table>
-        <table className="total-rf-table">
-          <tbody>
-            <tr>
-              <td className="total-md">₹</td>
+              <td className="total-sm">
+                <span>Sale:</span><br/>
+                <span>CGST + SGST:</span><br/>
+                <span>Total Amount: </span>
+              </td>
+              <td className="total-sm">
+                <span>₹ <AnimatedNumber component="text" value={this.getInvoiceTotal()} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity'}} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></span>
+                <br/><span>{this.state.cgst}% + {this.state.sgst}%</span><br/>
+                <span>₹ <AnimatedNumber component="text" value={this.getInvoiceTotal('gst')} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity'}} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></span>
+              </td>
               <td className="total-lg">
-              <AnimatedNumber component="text" value={this.getInvoiceTotal('round')} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity' }} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} />
+                <span>₹ <AnimatedNumber component="text" value={this.getInvoiceTotal('round')} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity' }} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></span>
+              </td>
+              <td>
+                <button type="button" className="btn btn-large btn-default bill-btn">
+                  <span className="icon icon-print"></span> Print
+                </button>
               </td>
             </tr>
-          </tbody>
+            </tbody>
         </table>
       <span className="total-lg"></span>
     </div>
