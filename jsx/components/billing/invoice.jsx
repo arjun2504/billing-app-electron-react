@@ -44,6 +44,7 @@ class Invoice extends React.Component
               'amount_gst': 0
             }
           ],
+          'saved': false,
           'total': 0,
           'total_gst': 0,
           'total_roff': 0
@@ -96,6 +97,8 @@ class Invoice extends React.Component
     this.handleSetProduct = this.handleSetProduct.bind(this);
     this.getProductAmount = this.getProductAmount.bind(this);
     this.getInvoiceTotal = this.getInvoiceTotal.bind(this);
+    this.handleSave = this.handleSave.bind(this);
+    this.getCurrentInvoice = this.getCurrentInvoice.bind(this);
 
     this.fetchProducts();
     pcodes = this.allProductCodes();
@@ -249,6 +252,11 @@ class Invoice extends React.Component
   handleSetProduct(val, pk) {
     pk.product_name = val.label;
     pk.product_code = val.value;
+    this.state.fetched_products.map(function(v,i) {
+      if(v.product_code == pk.product_code) {
+        pk.rate = v.price;
+      }
+    });
     this.forceUpdate();
     localStorage.setItem('state', JSON.stringify(this.state));
   }
@@ -287,6 +295,37 @@ class Invoice extends React.Component
     else {
       return invoiceTotal;
     }
+  }
+
+  getCurrentInvoice() {
+    var current_invoice;
+    this.state.invoices.map(function(v,i) {
+      if(v.bid == this.state.active_invoice) {
+        current_invoice = v;
+      }
+    }.bind(this));
+    return current_invoice;
+  }
+
+  handleSave() {
+    var invoice = this.getCurrentInvoice();
+    fetch(api + "invoice/save", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(invoice)
+    }).then( (response) => {
+      return response.json()
+    }).then( (json) => {
+      console.log(json);
+      // this.state.invoices.map(function(v,i) {
+      //   if(v == invoice) {
+      //     v.saved = true;
+      //   }
+      // }.bind(this));
+    });
   }
 
   render() {
@@ -408,18 +447,21 @@ class Invoice extends React.Component
             <tr>
               <td className="total-sm">
                 <span>Sale:</span><br/>
-                <span>CGST + SGST:</span><br/>
+                <span>CGST ({this.state.cgst}%) + SGST ({this.state.sgst}%):</span><br/>
                 <span>Total Amount: </span>
               </td>
               <td className="total-sm">
                 <span>₹ <AnimatedNumber component="text" value={this.getInvoiceTotal()} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity'}} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></span>
-                <br/><span>{this.state.cgst}% + {this.state.sgst}%</span><br/>
+                <br/><span>₹ {parseFloat(this.getInvoiceTotal('gst') - this.getInvoiceTotal()).toFixed(2)}</span><br/>
                 <span>₹ <AnimatedNumber component="text" value={this.getInvoiceTotal('gst')} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity'}} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></span>
               </td>
               <td className="total-lg">
                 <span>₹ <AnimatedNumber component="text" value={this.getInvoiceTotal('round')} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity' }} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></span>
               </td>
               <td>
+                <button type="button" className="btn btn-large btn-default bill-btn" onClick={this.handleSave}>
+                  <span className="icon icon-check"></span> Save
+                </button><br/>
                 <button type="button" className="btn btn-large btn-default bill-btn">
                   <span className="icon icon-print"></span> Print
                 </button>

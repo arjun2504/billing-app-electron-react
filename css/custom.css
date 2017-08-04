@@ -216,12 +216,13 @@ tr:active {
 .bill-btn {
   width: 75px;
   font-weight: bold;
+  margin-top: 5px;
 }
 .toolbar-actions-custom {
   padding: 10px;
 }
 .filter-controls input[type="text"] {
-  width: 150px;
+  width: 90px;
   float: left;
   height: 20px;
 }
@@ -231,4 +232,35 @@ tr:active {
 }
 .history-controls .btn .icon {
   color: #fff;
+}
+.or-text {
+    color: #756f6f;
+    font-size: 11px;
+    padding: 0px 11px;
+}
+.date-range-picker .or-text {
+  float: left;
+  padding-top: 5px;
+}
+.date-range-picker > div {
+  float: left;
+}
+.date-range-picker {
+  float: right;
+}
+.date-range-picker input[type="text"] {
+  width: 90px;
+  height: 20px;
+}
+.pagination {
+  float: right;
+  margin-left: 10px;
+}
+.fixed-height {
+  background-color: red;
+  height: 300px;
+}
+.history-area {
+  width: 700px;
+  float: left;
 }

@@ -9,6 +9,7 @@
   "author": "Arjun",
   "dependencies": {
     "react-animated-number": "^0.4.3",
+    "react-datepicker": "^0.52.0",
     "react-select": "^1.0.0-rc.5"
   }
 }
