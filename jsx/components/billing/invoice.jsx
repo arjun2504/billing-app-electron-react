@@ -29,10 +29,24 @@ Array.prototype.getObject = function(name, value) {
 // 0.875 * 5 * 100 = meters * quantity * rate = amount
 class Invoice extends React.Component
 {
-  getBlankInvoice() {
+  getNextInvoiceId() {
+    fetch(api + "invoice/next").then((response) => {
+      return response.json();
+    }).then((json) => {
+      var nextId = json.next;
+      console.log(nextId);
+      this.state.active_invoice = nextId;
+      this.state.next_bid = nextId + 1;
+      this.state.invoices.push(this.getBlankInvoice(nextId));
+      localStorage.setItem('state', JSON.stringify(this.state));
+      this.forceUpdate();
+    }).catch((err) => { console.log(err) });
+  }
+
+  getBlankInvoice(bid = null) {
       return (
         {
-          'bid': 1,
+          'bid': bid,
           'products': [
             {
               'product_code': '',
@@ -69,22 +83,6 @@ class Invoice extends React.Component
   constructor(props) {
     super(props);
 
-    if(localStorage.getItem('state') == null) {
-      this.state = {
-        'fetched_products': [],
-        'activeTabLock': false,
-        'active_invoice': 1,
-        'next_bid': 2,
-        'invoices': [],
-        'pcodes_only': [],
-        'cgst': 2.5,
-        'sgst': 2.5
-      };
-      this.state.invoices.push(this.getBlankInvoice());
-    } else {
-      this.state = JSON.parse(localStorage.getItem('state'));
-    }
-
     this.handleNewInvoice = this.handleNewInvoice.bind(this);
     this.handleCloseInvoice = this.handleCloseInvoice.bind(this);
     this.handleActiveInvoice = this.handleActiveInvoice.bind(this);
@@ -99,15 +97,28 @@ class Invoice extends React.Component
     this.getInvoiceTotal = this.getInvoiceTotal.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.getCurrentInvoice = this.getCurrentInvoice.bind(this);
+    this.getNextInvoiceId = this.getNextInvoiceId.bind(this);
+
+    if(localStorage.getItem('state') == null) {
+
+      this.state = {
+        'fetched_products': [],
+        'activeTabLock': false,
+        //'active_invoice': -1,
+        //'next_bid': 2,
+        'invoices': [],
+        'pcodes_only': [],
+        'cgst': 2.5,
+        'sgst': 2.5,
+        'db_next_id': 0
+      };
+      this.getNextInvoiceId();
+    } else {
+      this.state = JSON.parse(localStorage.getItem('state'));
+    }
 
     this.fetchProducts();
     pcodes = this.allProductCodes();
-    /*
-    {
-      'bill_num': 1,
-      'product': []
-    }
-    */
   }
 
   ComponentDidMount() {
@@ -118,16 +129,15 @@ class Invoice extends React.Component
     fetch(api + "stock/all?stock=1").then((response) => { return response.json() }).then((json) => {
       this.setState({ 'fetched_products': json }, () => {
         this.setState({'pcodes_only':pcodes});
-        this.forceUpdate();
         localStorage.setItem('state', JSON.stringify(this.state));
+        this.forceUpdate();
       });
-    });
+    }).catch((err) => { console.log(err) });
   }
 
   handleNewInvoice(e) {
     e.preventDefault();
-    var blankInvoice = this.getBlankInvoice();
-    blankInvoice.bid = this.state.next_bid;
+    var blankInvoice = this.getBlankInvoice(this.state.next_bid);
     this.state.invoices.push(blankInvoice);
     this.setState({ 'next_bid': (this.state.next_bid + 1), 'active_invoice': blankInvoice.bid }, () => {
       localStorage.setItem('state', JSON.stringify(this.state));
@@ -159,7 +169,7 @@ class Invoice extends React.Component
         this.setState({ 'activeTabLock': true }, () => {
           this.setState({ 'active_invoice': nextActive });
           this.forceUpdate();
-          console.log(nextActive);
+          //console.log(nextActive);
           setTimeout(function() {
             this.setState({ 'activeTabLock': false });
             this.forceUpdate();
@@ -243,6 +253,7 @@ class Invoice extends React.Component
     this.state.fetched_products.map(function(k,i) {
       codes.push({ 'value': k.product_code, 'label': k.product_name });
     });
+    this.forceUpdate();
     return codes;
   }
   handleSelectCode() {
@@ -278,7 +289,7 @@ class Invoice extends React.Component
     this.state.invoices.map(function(v,i) {
       if(v.bid == this.state.active_invoice) {
         v.products.map(function(kv,ki) {
-          invoiceTotal += kv.amount_gst;
+          invoiceTotal += kv.amount;
           v.total = invoiceTotal;
           v.total_gst = ( ( ( ( this.state.cgst + this.state.sgst ) / 100 ) * v.total ) + v.total );
           invoiceTotalGst = v.total_gst;
