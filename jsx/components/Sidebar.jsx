@@ -40,6 +40,12 @@ class Sidebar extends React.Component
             'component': require('./settings/general.jsx')
           },
           {
+            'name': 'api',
+            'title': 'API',
+            'icon': 'icon icon-code',
+            'component': require('./settings/api.jsx')
+          },
+          {
             'name': 'template',
             'title': 'Bill Template',
             'icon': 'icon icon-newspaper',

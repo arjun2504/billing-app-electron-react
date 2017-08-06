@@ -6,7 +6,8 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
-global.sharedObj = { 'api' : 'http://127.0.0.1/jrk-api/public/api/' };
+
+//global.sharedObj = { 'api' : 'http://localhost/jrk-api/public/api/' };
 let mainWindow
 
 function createWindow () {

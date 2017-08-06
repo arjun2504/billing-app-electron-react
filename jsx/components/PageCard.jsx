@@ -6,7 +6,7 @@ class PageCard extends React.Component
 {
   render() {
     return(
-      <div>
+      <div className="page-card">
         <div className="icon-area pull-left">
           <span className={'icon ' + this.props.icon}></span>
         </div>

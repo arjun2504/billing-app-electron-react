@@ -2,20 +2,91 @@
 
 var React = require('react');
 var QrCode = require('qrcode.react');
-var api = require('electron').remote.getGlobal('sharedObj').api;
+//var api = require('electron').remote.getGlobal('sharedObj').api;
+var api = localStorage.getItem('api');
+var classNames = require('classnames');
 
 class InvoiceTemplate extends React.Component
 {
   constructor(props) {
     super(props);
+
     this.state = {
-      invoice: this.props.invoice,
+      invoice: {},
       products: [],
-      sgst: 2.5,
-      cgst: 2.5
+      options: {}
     };
+    this.getInvoice = this.getInvoice.bind(this);
     this.getProducts = this.getProducts.bind(this);
-    this.getProducts();
+    //this.getOptions = this.getOptions.bind(this);
+    this.getTotalTaxCalc = this.getTotalTaxCalc.bind(this);
+    this.handlePrint = this.handlePrint.bind(this);
+
+
+
+  }
+
+  componentDidMount() {
+    if(this.props.print == 1 && this.props.currentInvoice !== 'undefined') {
+      this.getInvoice(this.props.currentInvoice.bid);
+    }
+    else
+      this.getInvoice(this.props.invoice);
+  }
+
+  // saveInvoice(invoice) {
+  //   fetch(api + "invoice/save", {
+  //     method: 'POST',
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify(invoice)
+  //   }).then( (response) => {
+  //     return response.json()
+  //   }).then( (json) => {
+  //     this.getInvoice(this.props.currentInvoice.bid);
+  //   });
+  // }
+
+  getInvoice(id) {
+    fetch(api + "invoice/id/" + id).then((response) => {
+      return response.json();
+    }).then((json) => {
+      this.state.invoices = [];
+      if(json.data) {
+        json.data.map(function(v,i) {
+          this.state.invoice = {
+            'id': v.id,
+            'total': v.total,
+            'total_gst': v.total,
+            'sale': v.sale,
+            'created_at': this.getDateTime(v.created_at),
+            'checked': false
+          };
+        }.bind(this));
+      }
+      this.getProducts();
+    });
+  }
+
+  getDateTime(datetime) {
+    var t = datetime.split(/[- :]/);
+    var d = new Date(Date.UTC(t[0], t[1]-1, t[2], t[3], t[4], t[5]));
+    return d.toLocaleDateString("en-US", {
+        year: "numeric", month: "short",
+        day: "numeric", hour: "2-digit", minute: "2-digit"
+      });
+  }
+
+  handlePrint() {
+    var content = document.getElementById("printcontents");
+    var pri = document.getElementById("ifmcontentstoprint").contentWindow;
+    pri.document.open();
+    pri.document.write(content.innerHTML);
+    pri.document.close();
+    pri.focus();
+    pri.print();
   }
 
   getProducts() {
@@ -23,13 +94,69 @@ class InvoiceTemplate extends React.Component
     return fetch(api + 'invoice/products/' + this.state.invoice.id).then((response) => {
       return response.json();
     }).then((json) => {
-      this.setState({ products: json });
+      //this.getOptions();
+      this.state.products = json;
+      this.getTotalTaxCalc();
+      this.forceUpdate();
+      if(this.props.print == 1)
+        window.print();
     });
   }
 
+  getOptions() {
+    fetch(api + 'option/all').then((response) => {
+      return response.json();
+    }).then((json) => {
+      this.setState({ options: json });
+      this.forceUpdate();
+      localStorage.setItem('state', JSON.stringify(this.state));
+    });
+  }
+
+  getTotalTaxCalc() {
+    var sale1 = 0;
+    var sale2 = 0;
+    var saleStr1 = "";
+    var saleStr2 = "";
+    var tax1 = 0, tax2 = 0;
+    var tax3 = 0, tax4 = 0;
+    this.state.products.map(function(k,i) {
+      if(k.rate >= 1000) {
+        sale1 += k.amount;
+        tax1 = k.cgst;
+        tax2 = k.sgst;
+      }
+      if (k.rate < 1000){
+        sale2 += k.amount;
+        tax3 = k.cgst;
+        tax4 = k.sgst;
+      }
+    });
+    if(sale1 != 0)
+      saleStr1 = "SALE: " + parseFloat(sale1).toFixed(2) + " CGST: " + tax1 + "% " + parseFloat((tax1 / 100) * sale1).toFixed(2) + " SGST: " + tax2 + "% " + parseFloat((tax2 / 100) * sale1).toFixed(2);
+    if(sale2 != 0)
+      saleStr2 = "SALE: " + parseFloat(sale2).toFixed(2) + " CGST: " + tax3 + "% " + parseFloat((tax3 / 100) * sale2).toFixed(2) + " SGST: " + tax4 + "% " + parseFloat((tax4 / 100) * sale2).toFixed(2);
+
+    if(sale1 != 0 && sale2 != 0)
+      return (
+        <span>
+        {saleStr1} <br/> {saleStr2}
+        </span>
+      )
+    else if(sale1 != 0 && sale2 == 0)
+      return saleStr1
+    else if(sale1 == 0 && sale2 != 0)
+      return saleStr2
+  }
+
   render() {
+    var invoicePageClass = classNames({
+      'invoice-page': true,
+      'hide': this.props.invisible == "1"
+    });
     return(
-      <div className="invoice-page">
+      <div>
+      <div className={invoicePageClass} id="printcontents">
         <header>
           <h2>JRK Textiles</h2>
           <div className="pull-left date-time-bill">{this.state.invoice.created_at}</div>
@@ -43,7 +170,7 @@ class InvoiceTemplate extends React.Component
                 <th className="invoice-product-code">Mts.</th>
                 <th className="invoice-product-code">Qty.</th>
                 <th>Rate</th>
-                <th>Amount</th>
+                <th>Amt.</th>
               </tr>
             </thead>
 
@@ -60,7 +187,7 @@ class InvoiceTemplate extends React.Component
                       <td>{parseFloat(v.amount_gst).toFixed(2)}</td>
                     </tr>
                     <tr>
-                      <td className="right-align" colSpan="6">SALE: {v.amount} CGST: {this.state.cgst}% {parseFloat((this.state.cgst / 100) * v.amount).toFixed(2)} SGST: {this.state.cgst}% {parseFloat((this.state.sgst / 100) * v.amount).toFixed(2)}</td>
+                      <td className="right-align" colSpan="6">SALE: {v.amount} CGST: {v.cgst}% {parseFloat((v.cgst / 100) * v.amount).toFixed(2)} SGST: {v.cgst}% {parseFloat((v.sgst / 100) * v.amount).toFixed(2)}</td>
                     </tr>
                     </tbody>
                   )
@@ -75,7 +202,7 @@ class InvoiceTemplate extends React.Component
                 <td>{parseFloat(this.state.invoice.total_gst).toFixed(2)}</td>
               </tr>
               <tr>
-                <td className="right-align" colSpan="5">SALE: {parseFloat(this.state.invoice.sale).toFixed(2)} CGST: {this.state.cgst}% {parseFloat((this.state.cgst / 100) * this.state.invoice.sale).toFixed(2)} SGST: {this.state.cgst}% {parseFloat((this.state.sgst / 100) * this.state.invoice.sale).toFixed(2)}</td>
+                <td className="left-align" colSpan="6">{this.getTotalTaxCalc()}</td>
               </tr>
             </tfoot>
           </table>
@@ -85,7 +212,7 @@ class InvoiceTemplate extends React.Component
         </section>
         <footer>
           <div className="pull-left footer-section-sm">
-            <QrCode value={this.state.invoice.id+""} size="70"/>
+            <QrCode value={this.state.invoice.id+""} size={40} />
           </div>
           <div className="pull-left footer-section-lg">
             <p className="center-align">Goods once sold cannot be taken back.<br/>
@@ -95,6 +222,15 @@ class InvoiceTemplate extends React.Component
           </div>
           <div className="clearfix"></div>
         </footer>
+      </div>
+      { this.props.print != 1 &&
+      <center>
+      <button type="button" className="btn btn-default btn-large print-templ-btn bill-btn" onClick={() => window.print()}>
+        <span className="icon icon-print icon-text"></span>
+          Print
+        </button>
+      </center>
+      }
       </div>
     )
   }

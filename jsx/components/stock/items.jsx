@@ -2,7 +2,8 @@
 
 var React = require('react');
 var PageCard = require('../PageCard.jsx');
-var api = require('electron').remote.getGlobal('sharedObj').api;
+//var api = require('electron').remote.getGlobal('sharedObj').api;
+var api = localStorage.getItem('api');
 var $ = require('jquery');
 var classNames = require('classnames');
 

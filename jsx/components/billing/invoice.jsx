@@ -4,10 +4,12 @@ var React = require('react');
 var PageCard = require('../PageCard.jsx');
 var classNames = require('classnames');
 var $ = require('jquery');
-var api = require('electron').remote.getGlobal('sharedObj').api;
+//var api = require('electron').remote.getGlobal('sharedObj').api;
+var api = localStorage.getItem('api');
 var Select = require('react-select');
 //var pcodes = [];
 var AnimatedNumber = require('react-animated-number');
+var InvoiceTemplate = require('../InvoiceTemplate.jsx');
 //require('react-select/dist/react-select.css');
 
 Array.prototype.removeValue = function(name, value){
@@ -38,7 +40,7 @@ class Invoice extends React.Component
       this.state.active_invoice = nextId;
       this.state.next_bid = nextId + 1;
       this.state.invoices.push(this.getBlankInvoice(nextId));
-      localStorage.setItem('state', JSON.stringify(this.state));
+      this.saveToLocal();
       this.forceUpdate();
     }).catch((err) => { console.log(err) });
   }
@@ -77,7 +79,9 @@ class Invoice extends React.Component
             'meters': '',
             'quantity': '',
             'amount': 0,
-            'amount_gst': 0
+            'amount_gst': 0,
+            'cgst': 0,
+            'sgst': 0
           }
         )
   }
@@ -100,6 +104,11 @@ class Invoice extends React.Component
     this.handleSave = this.handleSave.bind(this);
     this.getCurrentInvoice = this.getCurrentInvoice.bind(this);
     this.getNextInvoiceId = this.getNextInvoiceId.bind(this);
+    this.changeInvoiceSavedStatus = this.changeInvoiceSavedStatus.bind(this);
+    this.getCgst = this.getCgst.bind(this);
+    this.getSgst = this.getSgst.bind(this);
+    this.saveToLocal = this.saveToLocal.bind(this);
+    //this.renderPrint = this.renderPrint.bind(this);
 
     if(localStorage.getItem('state') == null) {
 
@@ -110,20 +119,29 @@ class Invoice extends React.Component
         //'next_bid': 2,
         'invoices': [],
         'pcodes_only': [],
-        'db_next_id': 0
+        'db_next_id': 0,
+        'options': {},
+        'currentPrint': -1
       };
       this.getNextInvoiceId();
 
     } else {
       this.state = JSON.parse(localStorage.getItem('state'));
     }
-
-
-
   }
 
   componentDidMount() {
     this.fetchProducts();
+  }
+
+  fetchOptions() {
+    fetch(api + 'option/all').then((response) => {
+      return response.json();
+    }).then((json) => {
+      this.setState({ options: json });
+      this.forceUpdate();
+      this.saveToLocal();
+    });
   }
 
   fetchProducts() {
@@ -136,9 +154,11 @@ class Invoice extends React.Component
         });
         this.setState({'pcodes_only': pcodes}, () => {
           this.forceUpdate();
-          localStorage.setItem('state', JSON.stringify(this.state));
+          this.saveToLocal();
         });
       });
+    }).then(() => {
+      this.fetchOptions();
     });
   }
 
@@ -147,7 +167,7 @@ class Invoice extends React.Component
     var blankInvoice = this.getBlankInvoice(this.state.next_bid);
     this.state.invoices.push(blankInvoice);
     this.setState({ 'next_bid': (this.state.next_bid + 1), 'active_invoice': blankInvoice.bid }, () => {
-      localStorage.setItem('state', JSON.stringify(this.state));
+      this.saveToLocal();
     });
 
   }
@@ -189,19 +209,22 @@ class Invoice extends React.Component
 
   handleActiveInvoice(billno) {
     if(!this.state.activeTabLock) {
+      this.state.currentPrint = -1;
       this.setState({ 'active_invoice': billno }, () => {
         this.forceUpdate();
-        localStorage.setItem('state', JSON.stringify(this.state));
+        this.saveToLocal();
       });
     }
   }
 
   handleRow(e) {
+    this.state.currentPrint = -1;
     var val = e.target.value;
     var name = e.target.name.split('-');
     var key = name[0];
     var index = name[1];
     var active_invoice = parseInt(this.state.active_invoice);
+    this.changeInvoiceSavedStatus(false);
     this.state.invoices.map(function(k,v) {
       if(k.bid == active_invoice) {
           k.products.map(function(pk, pv) {
@@ -220,33 +243,43 @@ class Invoice extends React.Component
                   pk.quantity = val;
                   break;
               }
+              pk.cgst = this.getCgst(pk.rate);
+              pk.sgst = this.getSgst(pk.rate);
             }
-        });
+        }.bind(this));
       }
-    });
+    }.bind(this));
     this.forceUpdate();
-    localStorage.setItem('state', JSON.stringify(this.state));
+    this.saveToLocal();
   }
 
   handleNewRow() {
     var active_invoice = this.state.active_invoice;
+    this.state.currentPrint = -1;
     this.state.invoices.map(function(k,v) {
       if(k.bid == active_invoice) {
         k.products.push(this.getBlankProduct());
       }
     }.bind(this));
     this.forceUpdate();
-    localStorage.setItem('state', JSON.stringify(this.state));
+    this.saveToLocal();
   }
 
   handleRemoveRow(index) {
     var active_invoice = this.state.active_invoice;
+    //this.state.currentPrint = -1;
     this.state.invoices.map(function(k,v) {
       if(k.bid == active_invoice)
         return k.products.splice(index,1);
     });
     this.forceUpdate();
-    localStorage.setItem('state', JSON.stringify(this.state));
+    this.saveToLocal();
+  }
+
+  saveToLocal() {
+    var printrem = this.state;
+    printrem.currentPrint = -1;
+    localStorage.setItem('state', JSON.stringify(printrem));
   }
 
   handleTabPress(e, productIndex, invoiceIndex) {
@@ -277,19 +310,22 @@ class Invoice extends React.Component
       }
     });
     this.forceUpdate();
-    localStorage.setItem('state', JSON.stringify(this.state));
+    this.saveToLocal();
   }
 
-  getTax(rate) {
+  getCgst(rate) {
+    return ((rate >= 1000) ? parseFloat(this.state.options.cgst_ge_1000) : parseFloat(this.state.options.cgst_lt_1000));
+  }
 
+  getSgst(rate) {
+    return ((rate >= 1000) ? parseFloat(this.state.options.sgst_ge_1000) : parseFloat(this.state.options.sgst_lt_1000));
   }
 
   getProductAmount(pk) {
     var total = 0, total_gst = 0;
     var meters = ((pk.meters+"").trim() == "") ? 1 : pk.meters;
     total = meters * pk.quantity * pk.rate;
-    var tax = this.getTax(pk.rate);
-    total_gst = ( ( ( ( tax ) / 100 ) * total ) + total);
+    total_gst = ( ( ( ( pk.cgst + pk.sgst ) / 100 ) * total ) + total);
     pk.amount = total;
     pk.amount_gst = total_gst;
     return total_gst;
@@ -301,17 +337,20 @@ class Invoice extends React.Component
     var roundOff = 0;
     this.state.invoices.map(function(v,i) {
       if(v.bid == this.state.active_invoice) {
+        v.total_gst = 0;
         v.products.map(function(kv,ki) {
-          invoiceTotal += kv.amount;
-          v.total = invoiceTotal;
-          v.total_gst = ( ( ( ( this.state.cgst + this.state.sgst ) / 100 ) * v.total ) + v.total );
-          invoiceTotalGst = v.total_gst;
-          v.total_roff = Math.round(v.total_gst);
-          roundOff = v.total_roff;
+          if(kv.amount != 0) {
+            invoiceTotal += kv.amount;
+            v.total = invoiceTotal;
+            //v.total_gst = ( ( ( ( kv.cgst + kv.sgst ) / 100 ) * invoiceTotal ) + invoiceTotal );
+            v.total_gst += kv.amount_gst;
+            invoiceTotalGst = v.total_gst;
+            v.total_roff = Math.round(v.total_gst);
+            roundOff = v.total_roff;
+          }
         }.bind(this));
       }
     }.bind(this));
-
     if(type == 'round')
       return roundOff;
     else if(type == 'gst')
@@ -331,7 +370,7 @@ class Invoice extends React.Component
     return current_invoice;
   }
 
-  handleSave() {
+  handleSave(print = null) {
     var invoice = this.getCurrentInvoice();
     fetch(api + "invoice/save", {
       method: 'POST',
@@ -344,16 +383,28 @@ class Invoice extends React.Component
       return response.json()
     }).then( (json) => {
       if(json.status == "success") {
-        alert("Saved Successfully");
+        if(print == 'print') {
+          this.setState({ 'currentPrint': invoice.bid }, () => {
+            this.forceUpdate();
+          });
+        } else {
+          alert("Saved Successfully");
+        }
+        this.changeInvoiceSavedStatus(true);
       } else {
         alert("Error while saving invoice!");
       }
-      // this.state.invoices.map(function(v,i) {
-      //   if(v == invoice) {
-      //     v.saved = true;
-      //   }
-      // }.bind(this));
     });
+  }
+
+  changeInvoiceSavedStatus(status) {
+    this.state.invoices.map(function(v,i) {
+      if(v.id == this.state.currentInvoice) {
+        v.saved = status;
+      }
+    }.bind(this));
+    this.forceUpdate();
+    this.saveToLocal();
   }
 
   render() {
@@ -373,11 +424,11 @@ class Invoice extends React.Component
                       'tab-item': true,
                       'active': this.state.active_invoice === v.bid
                     });
-
+                    var saved = (v.saved == true) ? "" : "*";
                     return (
                       <div className={tabClass} key={'tab-' + v.bid} id={'bill-' + v.bid} name={'bill-' + v.bid} onClick={() => { this.handleActiveInvoice(v.bid) }}>
                         <span className="icon icon-close-tab" onClick={() => { this.handleCloseInvoice(v.bid) }}></span>
-                        {'Invoice #' + v.bid}
+                        {saved + 'Invoice #' + v.bid}
                       </div>
                     )
                 }.bind(this))
@@ -475,7 +526,7 @@ class Invoice extends React.Component
             <tr>
               <td className="total-sm">
                 <span>Sale:</span><br/>
-                <span>CGST ({this.state.cgst}%) + SGST ({this.state.sgst}%):</span><br/>
+                <span>CGST (%) + SGST (%):</span><br/>
                 <span>Total Amount: </span>
               </td>
               <td className="total-sm">
@@ -490,9 +541,14 @@ class Invoice extends React.Component
                 <button type="button" className="btn btn-large btn-default bill-btn" onClick={this.handleSave}>
                   <span className="icon icon-check"></span> Save
                 </button><br/>
-                <button type="button" className="btn btn-large btn-default bill-btn">
-                  <span className="icon icon-print"></span> Print
+                <button type="button" className="btn btn-large btn-default bill-btn" onClick={ () => { this.handleSave('print') }}>
+                  <span className="icon icon-print icon-text"></span>
+                  Print
                 </button>
+                {
+                  this.state.active_invoice == this.state.currentPrint &&
+                    <InvoiceTemplate invoice={this.state.currentPrint} invisible="1" print={1} currentInvoice={this.getCurrentInvoice()} />
+                }
               </td>
             </tr>
             </tbody>
@@ -502,6 +558,14 @@ class Invoice extends React.Component
     </div>
     )
   }
+
+
+  // renderPrint(bid) {
+  //   return(
+  //
+  //   )
+  // }
+
 }
 
 module.exports = Invoice;

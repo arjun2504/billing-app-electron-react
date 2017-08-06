@@ -4,7 +4,8 @@ var React = require('react');
 var PageCard = require('../PageCard.jsx');
 var DatePicker = require('react-datepicker').default;
 var moment = require('moment');
-var api = require('electron').remote.getGlobal('sharedObj').api;
+//var api = require('electron').remote.getGlobal('sharedObj').api;
+var api = localStorage.getItem('api');
 var classNames = require('classnames');
 var InvoiceTemplate = require('../InvoiceTemplate.jsx');
 
@@ -317,14 +318,7 @@ class History extends React.Component
               if(this.state.currentInvoice == k.id) {
                 return(
                   <div key={'tp-'+k.id}>
-                    <InvoiceTemplate invoice={k} />
-                    <br/>
-                    <center>
-                      <button type="button" className="btn btn-default btn-large">
-                        <span className="icon icon-print icon-text"></span>
-                          Print
-                        </button>
-                      </center>
+                    <InvoiceTemplate invoice={k.id} />
                   </div>
                 )
               }

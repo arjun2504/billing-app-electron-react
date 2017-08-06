@@ -34,7 +34,7 @@
   border-width: 0 0 1px 0;
 }
 .template-form {
-  width: 45%;
+  width: 50%;
   padding: 20px 30px;
 }
 .settings-category {
@@ -47,6 +47,9 @@
 .stock-management {
   width:40%;
   padding: 20px;
+}
+.btn-primary .icon {
+  color: #fff;
 }
 /*.tab-group {
   position: fixed;
@@ -304,7 +307,7 @@ tr:active {
   position: absolute;
   float: right;
   right: 0px;
-  height: 100%;
+  height: calc(100% - 81px);
   padding: 40px;
 }
 .invoice-page {
@@ -318,7 +321,7 @@ tr:active {
   table-layout: fixed;
 }
 .invoice-product-name {
-  width: 150px;
+  max-width: 150px;
   white-space: normal !important;
 }
 .invoice-page section table tbody tr td, .invoice-page section table tfoot tr td {
@@ -342,7 +345,7 @@ tr:active {
   border-bottom: 1px dashed #000;
 }
 .invoice-product-code {
-  width: 70px;
+  width: 60px;
 }
 .right-align {
   text-align: right;
@@ -377,4 +380,78 @@ footer {
 }
 .date-time-bill {
   padding-left: 15px;
+}
+.hide {
+  display: none;
+}
+.api-page-cont {
+  width: 60%;
+}
+@media print {
+  .toolbar-footer, .page-card, .history-area, .nav-group, .tab-group, .table-area, .total-table tr td[class^="total-"], .total-table tr td .bill-btn {
+    display: none;
+  }
+  .total-table tr td {
+    text-align: left;
+  }
+  .right-align {
+    text-align: right !important;
+  }
+  .total-content {
+    bottom: auto;
+    top: 0;
+    padding: 0px;
+  }
+  .total-table tr td {
+    padding: 0px;
+  }
+  .invoice-page {
+    display: block;
+  }
+  .total-table {
+    float: left;
+    width: 100%;
+  }
+  .bill-area {
+    width: 100%;
+    padding: 0px;
+  }
+  .invoice-page {
+    min-height: 200px;
+    width: 10.41cm;
+    font-family: 'courier new';
+    border: 0px solid #000;
+  }
+  .pane {
+    border-left: 0px solid #ddd;
+  }
+  .grand-total-section {
+    font-size: 20px;
+  }
+  .print-templ-btn {
+    display: none;
+  }
+  .invoice-page section table thead tr th, .invoice-page section table tbody tr td {
+    font-size: 10px;
+  }
+  .invoice-page section table tfoot tr td {
+    font-size: 10px;
+  }
+  .invoice-product-code {
+    width: 54px;
+  }
+  .invoice-product-name {
+    max-width: 156px;
+  }
+  .invoice-page footer p {
+    font-size: 10px;
+  }
+  .invoice-page table tr td, .invoice-page table tr th {
+    padding: 2px 5px;
+  }
+  @page {
+    margin: 0;
+    padding: 0;
+    width:  10.41cm;
+  }
 }
