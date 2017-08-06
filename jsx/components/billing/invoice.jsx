@@ -6,7 +6,7 @@ var classNames = require('classnames');
 var $ = require('jquery');
 var api = require('electron').remote.getGlobal('sharedObj').api;
 var Select = require('react-select');
-var pcodes = [];
+//var pcodes = [];
 var AnimatedNumber = require('react-animated-number');
 //require('react-select/dist/react-select.css');
 
@@ -34,7 +34,7 @@ class Invoice extends React.Component
       return response.json();
     }).then((json) => {
       var nextId = json.next;
-      console.log(nextId);
+      //console.log(nextId);
       this.state.active_invoice = nextId;
       this.state.next_bid = nextId + 1;
       this.state.invoices.push(this.getBlankInvoice(nextId));
@@ -55,7 +55,9 @@ class Invoice extends React.Component
               'meters': '',
               'quantity': '',
               'amount': 0,
-              'amount_gst': 0
+              'amount_gst': 0,
+              'cgst': 0,
+              'sgst': 0
             }
           ],
           'saved': false,
@@ -108,31 +110,36 @@ class Invoice extends React.Component
         //'next_bid': 2,
         'invoices': [],
         'pcodes_only': [],
-        'cgst': 2.5,
-        'sgst': 2.5,
         'db_next_id': 0
       };
       this.getNextInvoiceId();
+
     } else {
       this.state = JSON.parse(localStorage.getItem('state'));
     }
 
-    this.fetchProducts();
-    pcodes = this.allProductCodes();
+
+
   }
 
-  ComponentDidMount() {
-
+  componentDidMount() {
+    this.fetchProducts();
   }
 
   fetchProducts() {
     fetch(api + "stock/all?stock=1").then((response) => { return response.json() }).then((json) => {
       this.setState({ 'fetched_products': json }, () => {
-        this.setState({'pcodes_only':pcodes});
-        localStorage.setItem('state', JSON.stringify(this.state));
         this.forceUpdate();
+        var pcodes = [];
+        this.state.fetched_products.map(function(k,i) {
+          pcodes.push({ 'value': k.product_code, 'label': k.product_name });
+        });
+        this.setState({'pcodes_only': pcodes}, () => {
+          this.forceUpdate();
+          localStorage.setItem('state', JSON.stringify(this.state));
+        });
       });
-    }).catch((err) => { console.log(err) });
+    });
   }
 
   handleNewInvoice(e) {
@@ -256,6 +263,7 @@ class Invoice extends React.Component
     this.forceUpdate();
     return codes;
   }
+
   handleSelectCode() {
 
   }
@@ -272,11 +280,16 @@ class Invoice extends React.Component
     localStorage.setItem('state', JSON.stringify(this.state));
   }
 
+  getTax(rate) {
+
+  }
+
   getProductAmount(pk) {
     var total = 0, total_gst = 0;
     var meters = ((pk.meters+"").trim() == "") ? 1 : pk.meters;
     total = meters * pk.quantity * pk.rate;
-    total_gst = ( ( ( ( this.state.cgst + this.state.sgst ) / 100 ) * total ) + total);
+    var tax = this.getTax(pk.rate);
+    total_gst = ( ( ( ( tax ) / 100 ) * total ) + total);
     pk.amount = total;
     pk.amount_gst = total_gst;
     return total_gst;
@@ -330,7 +343,11 @@ class Invoice extends React.Component
     }).then( (response) => {
       return response.json()
     }).then( (json) => {
-      console.log(json);
+      if(json.status == "success") {
+        alert("Saved Successfully");
+      } else {
+        alert("Error while saving invoice!");
+      }
       // this.state.invoices.map(function(v,i) {
       //   if(v == invoice) {
       //     v.saved = true;

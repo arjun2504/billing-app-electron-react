@@ -221,22 +221,28 @@ tr:active {
 .toolbar-actions-custom {
   padding: 10px;
 }
+.filter-controls {
+  background-color: #cccccc;
+  padding: 2px;
+  border-radius: 5px;
+}
 .filter-controls input[type="text"] {
   width: 90px;
   float: left;
   height: 20px;
+  margin-right: 5px;
 }
 .history-controls {
   width: 150px;
   text-align:center;
 }
-.history-controls .btn .icon {
+.history-controls .btn-primary .icon, .pagination .btn-primary .icon {
   color: #fff;
 }
 .or-text {
     color: #756f6f;
     font-size: 11px;
-    padding: 0px 11px;
+    padding: 0px 5px;
 }
 .date-range-picker .or-text {
   float: left;
@@ -247,6 +253,9 @@ tr:active {
 }
 .date-range-picker {
   float: right;
+  background-color: #cccccc;
+  padding: 2px;
+  border-radius: 5px;
 }
 .date-range-picker input[type="text"] {
   width: 90px;
@@ -255,12 +264,117 @@ tr:active {
 .pagination {
   float: right;
   margin-left: 10px;
+  background-color: #cccccc;
+  padding: 2px;
+  border-radius: 5px;
 }
 .fixed-height {
   background-color: red;
   height: 300px;
 }
 .history-area {
-  width: 700px;
+  width: 600px;
   float: left;
+}
+.history-table thead tr th:nth-child(1){
+  width: 30px;
+}
+.pull-left {
+  float: left;
+}
+.filter-controls {
+  margin-right: 5px;
+}
+.invisible {
+  visibility: hidden;
+}
+.btn-container {
+  background-color: #cccccc;
+  padding: 2px;
+  border-radius: 5px;
+  margin-right: 5px;
+}
+.highlight-row {
+  background-color: #116cd6 !important;
+  color: #fff;
+}
+.bill-area {
+  background-color: #f5f5f5;
+  width: calc(100% - 601px);
+  position: absolute;
+  float: right;
+  right: 0px;
+  height: 100%;
+  padding: 40px;
+}
+.invoice-page {
+  background-color: #fff;
+  min-height: 200px;
+  width: 100%;
+  font-family: 'courier new';
+  border: 1px solid #000;
+}
+.invoice-page table {
+  table-layout: fixed;
+}
+.invoice-product-name {
+  width: 150px;
+  white-space: normal !important;
+}
+.invoice-page section table tbody tr td, .invoice-page section table tfoot tr td {
+  overflow: visible;
+  word-wrap: break-word;
+}
+.invoice-page header {
+  text-align: center;
+}
+.invoice-page section table thead tr th, .invoice-page section table tbody tr td {
+  font-size: 12px;
+}
+.invoice-page section table tfoot tr td {
+  font-size: 12px;
+}
+.invoice-page section table thead {
+  background-color: #fff;
+}
+.invoice-page section table thead tr th {
+  border-right: 0px solid #fff;
+  border-bottom: 1px dashed #000;
+}
+.invoice-product-code {
+  width: 70px;
+}
+.right-align {
+  text-align: right;
+}
+.center-align {
+  text-align: center;
+}
+.grand-total-section {
+  width: 100%;
+  border-style: dashed;
+  border-width: 1px 0 1px 0;
+  border-color: #000;
+  font-weight: bold;
+  text-align: center;
+  font-size: 30px;
+}
+.footer-section-sm {
+  width:20%;
+  padding: 10px;
+}
+.footer-section-lg {
+  width: 60%;
+}
+footer {
+  clear: both;
+}
+.clearfix {
+  clear: both;
+}
+.footer p {
+  padding: 0px;
+}
+.date-time-bill {
+  padding-left: 15px;
 }
