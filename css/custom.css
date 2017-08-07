@@ -387,6 +387,15 @@ footer {
 .api-page-cont {
   width: 60%;
 }
+.capitalize {
+  text-transform: capitalize;
+}
+.api-status .icon {
+  color: red;
+}
+.api-status .green-status {
+  color: green;
+}
 @media print {
   .toolbar-footer, .page-card, .history-area, .nav-group, .tab-group, .table-area, .total-table tr td[class^="total-"], .total-table tr td .bill-btn {
     display: none;

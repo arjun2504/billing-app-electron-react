@@ -384,9 +384,21 @@ class Invoice extends React.Component
     }).then( (json) => {
       if(json.status == "success") {
         if(print == 'print') {
-          this.setState({ 'currentPrint': invoice.bid }, () => {
-            this.forceUpdate();
-          });
+          console.log(this.state.currentPrint, this.state.active_invoice)
+          if(this.state.currentPrint != this.state.active_invoice) {
+            this.setState({ 'currentPrint': -1 }, () => {
+              this.forceUpdate();
+              this.setState({ 'currentPrint': invoice.bid }, () => {
+                this.forceUpdate();
+              });
+            });
+          }
+          else {
+            this.setState({ 'currentPrint': invoice.bid }, () => {
+              this.forceUpdate();
+            });
+          }
+
         } else {
           alert("Saved Successfully");
         }
@@ -399,7 +411,7 @@ class Invoice extends React.Component
 
   changeInvoiceSavedStatus(status) {
     this.state.invoices.map(function(v,i) {
-      if(v.id == this.state.currentInvoice) {
+      if(v.bid == this.state.active_invoice) {
         v.saved = status;
       }
     }.bind(this));
