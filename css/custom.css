@@ -396,6 +396,26 @@ footer {
 .api-status .green-status {
   color: green;
 }
+.templ-drop {
+  width: 40%;
+  float: left;
+  margin-right: 20px;
+}
+.templ-drop select {
+  height: 32px;
+}
+.templ-font {
+  width: 100px;
+  float: left;
+  margin-right: 20px;
+}
+.templ-font button {
+  padding: 0px;
+  margin-top: 9px;
+}
+.templ-font button .icon {
+  color: #fff;
+}
 @media print {
   .toolbar-footer, .page-card, .history-area, .nav-group, .tab-group, .table-area, .total-table tr td[class^="total-"], .total-table tr td .bill-btn {
     display: none;

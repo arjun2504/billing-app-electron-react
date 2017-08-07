@@ -47,7 +47,7 @@ class Sidebar extends React.Component
           },
           {
             'name': 'template',
-            'title': 'Bill Template',
+            'title': 'Template',
             'icon': 'icon icon-newspaper',
             'component': require('./settings/template.jsx')
           },

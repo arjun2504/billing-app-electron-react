@@ -51,7 +51,7 @@ class About extends React.Component
         <h2 className="settings-category">API Locator</h2>
         <div className="api-page-cont pull-left">
           <div className="form-group">
-            <label>API URL</label>
+            <label>URL</label>
             <input type="text" className="form-control" value={this.state.default} onChange={this.handleChange} placeholder="Enter API URL Prefix..."/>
           </div>
           <button type="button" className="btn btn-large btn-primary" onClick={this.handleSave}>
