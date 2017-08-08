@@ -10,6 +10,7 @@
 }
 .noselectmenu h2 {
   color: #e8e6e8;
+  text-shadow: 2px 2px #000;
 }
 .content-area {
   /*padding: 20px 30px;*/
@@ -396,6 +397,10 @@ footer {
 .api-status .green-status {
   color: green;
 }
+.sample-invoice {
+  width: 10.41cm;
+  margin-right: 40px;
+}
 .templ-drop {
   width: 40%;
   float: left;
@@ -418,8 +423,52 @@ footer {
 }
 .templ-custom-txt {
   float: left;
-  width: 50%;
+  width: 60%;
   margin-right: 20px;
+}
+.about {
+  padding: 30px;
+  font-size: 15px;
+}
+.template-print-conv {
+  width: 10.41cm;
+}
+.template-print-conv .invoice-page {
+  min-height: 200px;
+  width: 10.41cm;
+  font-family: 'courier new';
+  border: 1px solid #000;
+}
+.template-print-conv .grand-total-section {
+  font-size: 20px;
+}
+.template-print-conv .print-templ-btn {
+  display: none;
+}
+.template-print-conv .invoice-page section table thead tr th, .invoice-page section table tbody tr td {
+  font-size: 10px;
+}
+.template-print-conv .invoice-page section table tfoot tr td {
+  font-size: 10px;
+}
+.template-print-conv .invoice-product-code {
+  width: 54px;
+}
+.template-print-conv .invoice-product-name {
+  max-width: 156px;
+}
+.template-print-conv .invoice-page footer p {
+  font-size: 10px;
+}
+.template-print-conv .invoice-page table tr td, .invoice-page table tr th {
+  padding: 2px 5px;
+}
+.noselectmenu {
+  width: 100%;
+  height: 100% !important;
+  position: absolute;
+  background: url(../img/invoice-bg.jpg);
+  background-size: cover;
 }
 @media print {
   .toolbar-footer, .page-card, .history-area, .nav-group, .tab-group, .table-area, .total-table tr td[class^="total-"], .total-table tr td .bill-btn {

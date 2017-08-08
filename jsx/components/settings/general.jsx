@@ -53,8 +53,10 @@ class General extends React.Component
     }).then((response) => {
       return response.json();
     }).then((json) => {
-      if(json.status == 'success')
+      if(json.status == 'success') {
         alert("Successfully Saved.");
+        localStorage.setItem('company_name', this.state.options.company_name);
+      }
       else
         alert("Error Saving Settings.");
     })
@@ -110,6 +112,7 @@ class General extends React.Component
           Save
           </button>
         </center>
+        <br/><br/>
       </div>
     )
   }

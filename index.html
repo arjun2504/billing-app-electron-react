@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>JRK &amp; Sons</title>
+    <title></title>
     <link rel="stylesheet" href="css/photon.min.css" />
     <link rel="stylesheet" href="react-sel-css/react-select.min.css" />
     <link rel="stylesheet" href="react-dpicker-css/react-datepicker.min.css" />
@@ -12,6 +12,8 @@
   <body>
     <div id="root"></div>
     <script>
+        var title = localStorage.getItem('company_name');
+        document.title = (title == null) ? "Invoice Center" : title;
         require('node-jsx').install();
         require('./jsx/main.jsx');
     </script>

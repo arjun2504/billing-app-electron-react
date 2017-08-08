@@ -4,6 +4,7 @@ var React = require('react');
 var PageCard = require('../PageCard.jsx');
 var $ = require('jquery');
 var api = localStorage.getItem('api');
+var InvoiceTemplate = require('../InvoiceTemplate.jsx');
 
 Array.prototype.removeValue = function(index){
    var array = $.map(this, function(v,i){
@@ -24,6 +25,7 @@ class Template extends React.Component
     this.handleRemoveCustom = this.handleRemoveCustom.bind(this);
     this.getOption = this.getOption.bind(this);
     this.getCustomText = this.getCustomText.bind(this);
+    this.getHF = this.getHF.bind(this);
     this.handleSizeChange = this.handleSizeChange.bind(this);
     this.handleAddCustom = this.handleAddCustom.bind(this);
     this.handleChangeCustom = this.handleChangeCustom.bind(this);
@@ -34,13 +36,31 @@ class Template extends React.Component
       headers: [],
       footers: [],
       options: [],
-      custom: []
+      custom: [],
+      showTemplate: true
     };
-
-    this.state.headers.push(this.getBlankData());
-    this.state.footers.push(this.getBlankData());
+    this.getHF();
+    // this.state.headers.push(this.getBlankData());
+    // this.state.footers.push(this.getBlankData());
     this.getCustomText();
     this.getOption();
+  }
+
+  getHF() {
+    fetch(api + 'option/hf/get').then((response) => {
+      return response.json();
+    }).then((json) => {
+      this.state.headers = JSON.parse(json.header);
+      this.state.footers = JSON.parse(json.footer);
+      this.forceUpdate();
+    })
+  }
+
+  refreshTemplate() {
+    this.setState({ showTemplate: false });
+    this.forceUpdate();
+    this.setState({ showTemplate: true });
+    this.forceUpdate();
   }
 
   getCustomText() {
@@ -153,7 +173,9 @@ class Template extends React.Component
     }).then((response) => {
       return response.json();
     }).then((json) => {
-
+      if(json.status == 'success')
+        alert('Headers and footers successfully saved!');
+        this.refreshTemplate();
     })
   }
 
@@ -161,8 +183,13 @@ class Template extends React.Component
     return(
       <div>
       <PageCard icon="icon-newspaper" title="Invoice Template" description="Define headers and footers of invoice" />
-      <div className="template-form pull-left">
-        <h3 className="settings-category">Invoice</h3>
+      <div className="template-form pull-left sample-invoice">
+        <h3 className="settings-category">Preview</h3>
+        <div className="template-print-conv">
+        { this.state.showTemplate &&
+          <InvoiceTemplate sample={1} />
+        }
+        </div>
       </div>
       <div className="template-form pull-left">
         <h3 className="settings-category">Headers</h3>
@@ -172,7 +199,8 @@ class Template extends React.Component
             return (
               <div key={'header'+i}>
               <div className="form-group templ-drop">
-              <select className="form-control" onChange={(e) => this.handleRowSelect(e,k)}>
+              <select className="form-control" defaultValue={k.text} onChange={(e) => this.handleRowSelect(e,k)}>
+                <option>---Select---</option>
                 {
                   this.state.options.map(function(v,ix) {
                     return (
@@ -208,11 +236,12 @@ class Template extends React.Component
             return (
               <div key={'footer'+i}>
               <div className="form-group templ-drop">
-              <select className="form-control" onChange={(e) => this.handleRowSelect(e,k)}>
+              <select className="form-control" defaultValue={k.text} onChange={(e) => this.handleRowSelect(e,k)}>
+                <option>---Select---</option>
                 {
                   this.state.options.map(function(v,ix) {
                     return (
-                      <option key={'opt-'+ix} value={v.val}>{v.val}</option>
+                      <option key={'opt-'+ix}  value={v.val}>{v.val}</option>
                     )
                   }.bind(this))
                 }

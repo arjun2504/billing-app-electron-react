@@ -532,6 +532,7 @@ class Invoice extends React.Component
 
       </div>
     }
+    { this.state.invoices.length > 0 &&
     <div className="total-content pull-right">
         <table className="total-table">
           <tbody>
@@ -567,6 +568,7 @@ class Invoice extends React.Component
         </table>
       <span className="total-lg"></span>
     </div>
+    }
     </div>
     )
   }

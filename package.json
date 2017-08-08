@@ -1,10 +1,15 @@
 {
-  "name": "Billing",
+  "name": "invoice-center",
+  "productName": "Invoice Center",
+  "electron": "^1.6.11",
   "version": "1.0.0",
   "description": "A minimal billing application",
   "main": "app.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
+    "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CryptLife --version-string.FileDescription=CryptLife --version-string.ProductName=\"Invoice Center\"",
+    "package-linux": "electron-packager . --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/512x512.png --prune=true --out=release-builds"
   },
   "author": "Arjun",
   "dependencies": {
@@ -12,5 +17,9 @@
     "react-datepicker": "^0.52.0",
     "react-native-barcode-builder": "^1.0.1",
     "react-select": "^1.0.0-rc.5"
+  },
+  "devDependencies": {
+    "electron": "^1.6.11",
+    "electron-packager": "^8.7.2"
   }
 }

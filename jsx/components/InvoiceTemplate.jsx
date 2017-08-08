@@ -14,7 +14,9 @@ class InvoiceTemplate extends React.Component
     this.state = {
       invoice: {},
       products: [],
-      options: {}
+      options: {},
+      headers: [],
+      footers: []
     };
     this.getInvoice = this.getInvoice.bind(this);
     this.getProducts = this.getProducts.bind(this);
@@ -22,18 +24,71 @@ class InvoiceTemplate extends React.Component
     this.getTotalTaxCalc = this.getTotalTaxCalc.bind(this);
     this.handlePrint = this.handlePrint.bind(this);
     this.getInvoiceForQr = this.getInvoiceForQr.bind(this);
+    this.getHF = this.getHF.bind(this);
+  }
 
-
-
+  getHF() {
+    fetch(api + 'option/hf/get').then((response) => {
+      return response.json();
+    }).then((json) => {
+      this.state.headers = JSON.parse(json.header);
+      this.state.footers = JSON.parse(json.footer);
+      this.forceUpdate();
+    })
   }
 
   componentDidMount() {
-    if(this.props.print == 1 && this.props.currentInvoice !== 'undefined') {
-      this.getInvoice(this.props.currentInvoice.bid);
+    if(this.props.sample == 1) {
+      var now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      this.state.invoice = {
+        'id': 100,
+        'total': 1358,
+        'total_gst': 1357.55,
+        'sale': 1234,
+        'created_at': this.getDateTime(now),
+        'checked': false
+      };
+      this.state.products = [
+          	{
+          		"id": 1,
+          		"product_code": "123",
+          		"product_name": "Saree",
+          		"meter": 1,
+          		"quantity": 2,
+          		"rate": 300,
+          		"amount_gst": 630,
+          		"amount": 600,
+          		"invoice_id": 22,
+          		"created_at": now,
+          		"updated_at": now,
+          		"sgst": 2.5,
+          		"cgst": 2.5
+          	},
+            {
+          		"id": 2,
+          		"product_code": "456",
+          		"product_name": "T-Shirt",
+          		"meter": 1,
+          		"quantity": 2,
+          		"rate": 300,
+          		"amount_gst": 630,
+          		"amount": 600,
+          		"invoice_id": 22,
+          		"created_at": now,
+          		"updated_at": now,
+          		"sgst": 2.5,
+          		"cgst": 2.5
+          	}
+          ];
+    } else {
+      if(this.props.print == 1 && this.props.currentInvoice !== 'undefined') {
+        this.getInvoice(this.props.currentInvoice.bid);
+      }
+      else
+        this.getInvoice(this.props.invoice);
     }
-    else
-      this.getInvoice(this.props.invoice);
     this.getInvoiceForQr();
+    this.getHF();
   }
 
   getInvoiceForQr() {
@@ -118,6 +173,7 @@ class InvoiceTemplate extends React.Component
     }).then((json) => {
       //this.getOptions();
       this.state.products = json;
+      console.log(JSON.stringify(json));
       this.getTotalTaxCalc();
       this.forceUpdate();
       if(this.props.print == 1)
@@ -180,7 +236,21 @@ class InvoiceTemplate extends React.Component
       <div>
       <div className={invoicePageClass} id="printcontents">
         <header>
-          <h2>JRK Textiles</h2>
+        <div className="pull-left footer-section-sm">
+
+        </div>
+        <div className="pull-left footer-section-lg">
+          {
+            this.state.headers.map(function(k,i) {
+              var size = {
+                fontSize: k.size + 'px'
+              };
+              return(
+                <div key={'header-'+i} style={size}>{k.text}</div>
+              )
+            })
+          }
+          </div>
           <div className="pull-left date-time-bill">{this.state.invoice.created_at}</div>
         </header>
         <section>
@@ -237,10 +307,19 @@ class InvoiceTemplate extends React.Component
             <QrCode value={this.state.invoice.id+""} size={40} />
           </div>
           <div className="pull-left footer-section-lg">
-            <p className="center-align">Goods once sold cannot be taken back.<br/>
-            Thank you!<br/>
+            <div className="center-align">
+            {
+              this.state.footers.map(function(k,i) {
+                var size = {
+                  fontSize: k.size + 'px'
+                }
+                return(
+                  <div key={'footer-'+i} style={size}>{k.text}</div>
+                )
+              })
+            }
             Invoice No.: {this.state.invoice.id}<br/>
-            </p>
+            </div>
           </div>
           <div className="clearfix"></div>
         </footer>
