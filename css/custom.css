@@ -48,7 +48,7 @@
   width:40%;
   padding: 20px;
 }
-.btn-primary .icon {
+.btn-primary .icon, .btn-positive .icon {
   color: #fff;
 }
 /*.tab-group {
@@ -415,6 +415,11 @@ footer {
 }
 .templ-font button .icon {
   color: #fff;
+}
+.templ-custom-txt {
+  float: left;
+  width: 50%;
+  margin-right: 20px;
 }
 @media print {
   .toolbar-footer, .page-card, .history-area, .nav-group, .tab-group, .table-area, .total-table tr td[class^="total-"], .total-table tr td .bill-btn {

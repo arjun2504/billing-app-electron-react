@@ -13,7 +13,7 @@ Array.prototype.removeValue = function(index){
    this.push.apply(this, array); //push all elements except the one we want to delete
 }
 
-class General extends React.Component
+class Template extends React.Component
 {
   constructor(props) {
     super(props);
@@ -21,28 +21,43 @@ class General extends React.Component
     this.handleAddHeader = this.handleAddHeader.bind(this);
     this.handleAddFooter = this.handleAddFooter.bind(this);
     this.handleRemoveFooter = this.handleRemoveFooter.bind(this);
+    this.handleRemoveCustom = this.handleRemoveCustom.bind(this);
     this.getOption = this.getOption.bind(this);
+    this.getCustomText = this.getCustomText.bind(this);
     this.handleSizeChange = this.handleSizeChange.bind(this);
     this.handleAddCustom = this.handleAddCustom.bind(this);
+    this.handleChangeCustom = this.handleChangeCustom.bind(this);
+    this.handleCustomSave = this.handleCustomSave.bind(this);
+    this.handleHFSave = this.handleHFSave.bind(this);
 
     this.state = {
       headers: [],
       footers: [],
       options: [],
-      custom: [{
-        value: ''
-      }]
+      custom: []
     };
 
     this.state.headers.push(this.getBlankData());
     this.state.footers.push(this.getBlankData());
+    this.getCustomText();
     this.getOption();
   }
 
-  getOption() {
-    fetch(api + 'option/all').then((response) => {
+  getCustomText() {
+    fetch(api + 'option/custom-text/get').then((response) => {
       return response.json();
     }).then((json) => {
+      this.state.custom = json.custom_text;
+    }).then(() => {
+      this.forceUpdate();
+    });
+  }
+
+  getOption() {
+    fetch(api + 'option/template').then((response) => {
+      return response.json();
+    }).then((json) => {
+      this.state.options = [];
       for(var k in json) {
         if(json.hasOwnProperty(k)) {
           this.state.options.push({
@@ -52,7 +67,6 @@ class General extends React.Component
         }
       }
     }).then(() => {
-      console.log(this.state.options);
       this.forceUpdate();
     });
   }
@@ -75,13 +89,22 @@ class General extends React.Component
   }
 
   handleAddCustom() {
-    this.state.custom.push({ value: '' });
+    this.state.custom.push("");
     this.forceUpdate();
   }
 
   handleRemoveFooter(ix) {
-    console.log(this.state.footers[ix]);
     this.state.footers.splice(ix, 1);
+    this.forceUpdate();
+  }
+
+  handleRemoveHeader(ix) {
+    this.state.headers.splice(ix, 1);
+    this.forceUpdate();
+  }
+
+  handleRemoveCustom(ix) {
+    this.state.custom.splice(ix, 1);
     this.forceUpdate();
   }
 
@@ -95,6 +118,45 @@ class General extends React.Component
     this.forceUpdate();
   }
 
+  handleChangeCustom(e, i) {
+    this.state.custom[i] = e.target.value;
+    console.log(this.state.custom);
+    this.forceUpdate();
+  }
+
+  handleCustomSave() {
+    fetch(api + 'option/custom-text/save', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 'custom_text': this.state.custom })
+    }).then((response) => {
+      return response.json();
+    }).then((json) => {
+      if(json.status == 'success') {
+        alert('Custom Text Saved');
+        this.getOption();
+      }
+    })
+  }
+
+  handleHFSave() {
+    fetch(api + 'option/hf/save', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 'header': this.state.headers, 'footer': this.state.footers })
+    }).then((response) => {
+      return response.json();
+    }).then((json) => {
+
+    })
+  }
+
   render() {
     return(
       <div>
@@ -106,6 +168,7 @@ class General extends React.Component
         <h3 className="settings-category">Headers</h3>
         {
           this.state.headers.map(function(k,i) {
+            var index = i;
             return (
               <div key={'header'+i}>
               <div className="form-group templ-drop">
@@ -121,6 +184,11 @@ class General extends React.Component
               </div>
               <div className="form-group templ-font">
                 <input type="number" className="form-control" placeholder="Size" value={k.size} onChange={(e) => this.handleSizeChange(e,k)}/>
+              </div>
+              <div className="form-group templ-font">
+                <button type="button" className="btn btn-negative" onClick={() => this.handleRemoveHeader(index)}>
+                  <span className="icon icon-cancel"></span>
+                </button>
               </div>
               <div className="clearfix"></div>
               </div>
@@ -167,25 +235,44 @@ class General extends React.Component
           <span className="icon icon-plus-circled icon-text"></span>
           Add Footer
         </button>
+        <br/>
+        <br/>
+        <button type="button" className="btn btn-positive" onClick={this.handleHFSave}>
+          <span className="icon icon-floppy icon-text"></span>
+          Save
+        </button>
         <div className="clearfix"></div>
+        <br/>
+        <hr/>
         <br/>
         <h3 className="settings-category">Custom Text</h3>
         {
           this.state.custom.map(function(k,i) {
+            var index = i;
             return (
-              <div className="form-group">
-                <input type="text" className="form-control" value={k.value} placeholder={'Custom Text ' + (i+1)} />
+              <div key={'cus-' + i}>
+                <div className="form-group templ-custom-txt">
+                  <input type="text" className="form-control" value={k} placeholder={'Custom Text ' + (i+1)} onChange={(e) => this.handleChangeCustom(e,index)}/>
+                </div>
+                <div className="form-group templ-font">
+                  <button type="button" className="btn btn-negative" onClick={() => this.handleRemoveCustom(index)}>
+                    <span className="icon icon-cancel"></span>
+                  </button>
+                </div>
               </div>
             )
           }.bind(this))
         }
+        <div className="clearfix"></div>
         <button type="button" className="btn btn-primary" onClick={this.handleAddCustom}>
           <span className="icon icon-plus-circled icon-text"></span>
           Add Custom Text
         </button>
-        <button type="button" className="btn btn-primary" onClick={this.handleRemoveCustom}>
-          <span className="icon icon-plus-circled icon-text"></span>
-          Add Custom Text
+        <br/>
+        <br/>
+        <button type="button" className="btn btn-positive" onClick={this.handleCustomSave}>
+          <span className="icon icon-floppy icon-text"></span>
+          Save
         </button>
       </div>
       </div>
@@ -193,4 +280,4 @@ class General extends React.Component
   }
 }
 
-module.exports = General;
+module.exports = Template;

@@ -21,6 +21,7 @@ class InvoiceTemplate extends React.Component
     //this.getOptions = this.getOptions.bind(this);
     this.getTotalTaxCalc = this.getTotalTaxCalc.bind(this);
     this.handlePrint = this.handlePrint.bind(this);
+    this.getInvoiceForQr = this.getInvoiceForQr.bind(this);
 
 
 
@@ -32,6 +33,27 @@ class InvoiceTemplate extends React.Component
     }
     else
       this.getInvoice(this.props.invoice);
+    this.getInvoiceForQr();
+  }
+
+  getInvoiceForQr() {
+    var str = "Invoice Id: " + this.state.invoice.id + "\n";
+    this.state.products.map(function(k,i) {
+      str += "--------------------------------\n"
+      str += "Product #" + (i+1) + "\n";
+      str += "--------------------------------\n"
+      str += "Product Code: " + k.product_code + "\n";
+      str += "Product Name: " + k.product_name + "\n";
+      str += "Mts.: " + k.meter + "\n";
+      str += "Qty.: " + k.quantity + "\n";
+      str += "Rate: " + k.rate + "\n";
+      str += "CGST: " + k.cgst + "%\n";
+      str += "SGST: " + k.sgst + "%\n";
+      str += "Amount Excl. Tax: " + k.amount + "\n";
+      str += "Amount Incl. Tax: " + k.amount_gst + "\n";
+      str += "--------------------------------\n"
+    });
+    return str;
   }
 
   // saveInvoice(invoice) {
