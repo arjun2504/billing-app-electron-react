@@ -55,6 +55,7 @@ class History extends React.Component
             'id': v.id,
             'total': v.total,
             'total_gst': v.total,
+            'day_seq': v.day_seq,
             'sale': v.sale,
             'created_at': this.getDateTime(v.created_at),
             'checked': false
@@ -284,7 +285,8 @@ class History extends React.Component
               <thead>
                 <tr>
                   <th><input type="checkbox" id="main-check" onChange={this.handleChecked} defaultChecked={false} /></th>
-                  <th>Invoice #</th>
+                  <th>#</th>
+                  <th>Day Seq.</th>
                   <th>Total</th>
                   <th>Created at</th>
                 </tr>
@@ -302,6 +304,7 @@ class History extends React.Component
                     <tr className={classnames} key={'row-'+v.id} onClick={() => this.handleSelectRow(v.id)}>
                       <td><input type="checkbox" value={v.id} checked={checked} onClick={(e) => { this.handleChecked(e, v.id) }} defaultChecked={false} /></td>
                       <td>{v.id}</td>
+                      <td>{v.day_seq}</td>
                       <td>{v.total}</td>
                       <td>{v.created_at}</td>
                     </tr>

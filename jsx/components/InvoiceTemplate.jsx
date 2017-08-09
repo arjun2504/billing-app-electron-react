@@ -44,6 +44,7 @@ class InvoiceTemplate extends React.Component
         'id': 100,
         'total': 1358,
         'total_gst': 1357.55,
+        'day_seq': 1,
         'sale': 1234,
         'created_at': this.getDateTime(now),
         'checked': false
@@ -137,6 +138,7 @@ class InvoiceTemplate extends React.Component
             'id': v.id,
             'total': v.total,
             'total_gst': v.total,
+            'day_seq': v.day_seq,
             'sale': v.sale,
             'created_at': this.getDateTime(v.created_at),
             'checked': false
@@ -304,7 +306,7 @@ class InvoiceTemplate extends React.Component
         </section>
         <footer>
           <div className="pull-left footer-section-sm">
-            <QrCode value={this.state.invoice.id+""} size={40} />
+            <QrCode value={this.state.invoice.day_seq+""} size={40} />
           </div>
           <div className="pull-left footer-section-lg break-css">
             <div className="center-align">
@@ -318,7 +320,7 @@ class InvoiceTemplate extends React.Component
                 )
               })
             }
-            Invoice No.: {this.state.invoice.id}<br/>
+            Invoice No.: {this.state.invoice.day_seq}<br/>
             </div>
           </div>
           <div className="clearfix"></div>
