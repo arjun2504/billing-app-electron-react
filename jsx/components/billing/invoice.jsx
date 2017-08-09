@@ -49,6 +49,7 @@ class Invoice extends React.Component
       return (
         {
           'bid': bid,
+          'day_seq': 1,
           'products': [
             {
               'product_code': '',
@@ -110,6 +111,9 @@ class Invoice extends React.Component
     this.saveToLocal = this.saveToLocal.bind(this);
     //this.renderPrint = this.renderPrint.bind(this);
 
+
+    this.setDaySeq();
+
     if(localStorage.getItem('state') == null) {
 
       this.state = {
@@ -132,6 +136,28 @@ class Invoice extends React.Component
 
   componentDidMount() {
     this.fetchProducts();
+  }
+
+  setDaySeq(num = null) {
+    var today = new Date();
+    if(num == null)
+      num = 1;
+    var today_str = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
+    if(localStorage.getItem('today') == null) {
+      localStorage.setItem('today', today_str);
+    } else {
+      var saved_date = localStorage.getItem('today');
+      var saved_d = new Date(saved_date);
+      if(saved_d.getTime() < new Date(today_str).getTime()) {
+        localStorage.setItem('day_seq', num);
+        localStorage.setItem('today', today_str);
+      } else if( saved_d.getTime() === new Date(today_str).getTime() ){
+        localStorage.setItem('day_seq', parseInt(localStorage.getItem('day_seq')) + 1 );
+      }
+    }
+    if(localStorage.getItem('day_seq') == null) {
+      localStorage.setItem('day_seq', 2);
+    }
   }
 
   fetchOptions() {
@@ -165,7 +191,13 @@ class Invoice extends React.Component
   handleNewInvoice(e) {
     e.preventDefault();
     var blankInvoice = this.getBlankInvoice(this.state.next_bid);
+    blankInvoice.day_seq = localStorage.getItem('day_seq');
+    var seq = localStorage.getItem('day_seq');
+    //localStorage.setItem('day_seq', (parseInt(seq) + 1));
+    this.setDaySeq(1);
+
     this.state.invoices.push(blankInvoice);
+
     this.setState({ 'next_bid': (this.state.next_bid + 1), 'active_invoice': blankInvoice.bid }, () => {
       this.saveToLocal();
     });
@@ -440,7 +472,7 @@ class Invoice extends React.Component
                     return (
                       <div className={tabClass} key={'tab-' + v.bid} id={'bill-' + v.bid} name={'bill-' + v.bid} onClick={() => { this.handleActiveInvoice(v.bid) }}>
                         <span className="icon icon-close-tab" onClick={() => { this.handleCloseInvoice(v.bid) }}></span>
-                        {saved + 'Invoice #' + v.bid}
+                        {saved + 'Invoice #' + v.day_seq}
                       </div>
                     )
                 }.bind(this))
