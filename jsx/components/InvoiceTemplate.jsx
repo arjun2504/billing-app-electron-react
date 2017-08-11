@@ -16,7 +16,8 @@ class InvoiceTemplate extends React.Component
       products: [],
       options: {},
       headers: [],
-      footers: []
+      footers: [],
+      report: []
     };
     this.getInvoice = this.getInvoice.bind(this);
     this.getProducts = this.getProducts.bind(this);
@@ -25,6 +26,7 @@ class InvoiceTemplate extends React.Component
     this.handlePrint = this.handlePrint.bind(this);
     this.getInvoiceForQr = this.getInvoiceForQr.bind(this);
     this.getHF = this.getHF.bind(this);
+    this.getReportTotal = this.getReportTotal.bind(this);
   }
 
   getHF() {
@@ -35,6 +37,14 @@ class InvoiceTemplate extends React.Component
       this.state.footers = JSON.parse(json.footer);
       this.forceUpdate();
     })
+  }
+
+  getReportTotal() {
+      var total = 0;
+      this.state.report.map(function(k,i) {
+        total += k.total;
+      });
+      return total;
   }
 
   componentDidMount() {
@@ -84,6 +94,8 @@ class InvoiceTemplate extends React.Component
     } else {
       if(this.props.print == 1 && this.props.currentInvoice !== 'undefined') {
         this.getInvoice(this.props.currentInvoice.bid);
+      } else if(this.props.report) {
+        this.state.report = this.props.report;
       }
       else
         this.getInvoice(this.props.invoice);
@@ -239,7 +251,6 @@ class InvoiceTemplate extends React.Component
       <div className={invoicePageClass} id="printcontents">
         <header>
         <div className="pull-left footer-section-sm">
-
         </div>
         <div className="pull-left footer-section-lg break-css">
           {
@@ -255,6 +266,8 @@ class InvoiceTemplate extends React.Component
           </div>
           <div className="pull-left date-time-bill">{this.state.invoice.created_at}</div>
         </header>
+        {
+          this.state.products.length > 0 &&
         <section>
           <table>
             <thead>
@@ -293,7 +306,7 @@ class InvoiceTemplate extends React.Component
                 <td className="right-align" colSpan="5">
                 Total
                 </td>
-                <td>{parseFloat(this.state.invoice.total_gst).toFixed(2)}</td>
+                <td>₹ {parseFloat(this.state.invoice.total_gst).toFixed(2)}</td>
               </tr>
               <tr>
                 <td className="left-align" colSpan="6">{this.getTotalTaxCalc()}</td>
@@ -301,12 +314,52 @@ class InvoiceTemplate extends React.Component
             </tfoot>
           </table>
           <div className="grand-total-section">
-            GRAND TOTAL: {parseFloat(this.state.invoice.total).toFixed(2)}
+            GRAND TOTAL: ₹ {parseFloat(this.state.invoice.total).toFixed(2)}
           </div>
         </section>
+        }
+        {
+          this.state.report.length > 0 &&
+          <section>
+          <table className="reportable">
+            <thead>
+              <tr>
+                <th className="invoice-product-code">#</th>
+                <th className="invoice-product-code">Seq.</th>
+                <th>Time</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            {
+              this.state.report.map(function(k,i) {
+                return(
+                  <tbody key={k.id}>
+                    <tr>
+                      <td>{k.id}</td>
+                      <td>{k.day_seq}</td>
+                      <td>{k.created_at}</td>
+                      <td>{k.total}</td>
+                    </tr>
+                  </tbody>
+                )
+              })
+            }
+            <tfoot>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>Total: </td>
+                <td><strong>Rs. {this.getReportTotal()}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+          </section>
+        }
         <footer>
           <div className="pull-left footer-section-sm">
+          { this.state.report.length == 0 &&
             <QrCode value={this.state.invoice.day_seq+""} size={40} />
+          }
           </div>
           <div className="pull-left footer-section-lg break-css">
             <div className="center-align">
@@ -320,7 +373,9 @@ class InvoiceTemplate extends React.Component
                 )
               })
             }
-            Invoice No.: {this.state.invoice.day_seq}<br/>
+            { this.state.report.length == 0 &&
+            <span>Invoice No.: {this.state.invoice.day_seq}<br/></span>
+            }
             </div>
           </div>
           <div className="clearfix"></div>

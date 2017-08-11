@@ -180,6 +180,33 @@ tr:active {
 }
 .table-area {
   overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+.reportTotal {
+  width: 100%;
+  bottom: 0;
+  height: 40px;
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  border-color: #efefef;
+  padding: 7px;
+}
+.reportTotal p {
+  float: right;
+  font-size: 20px;
+  color: green;
+  font-weight: bold;
+  padding: 0px;
+  margin: -3px;
+  margin-right: 10px;
+}
+.reportable tfoot tr td {
+  border-style: dashed;
+  border-width: 1px 0 1px 0;
+  border-color: #000;
+}
+.reportTotal button {
+  float: right;
 }
 .total-sm text, .total-lg text {
   padding: 0px;
@@ -308,8 +335,9 @@ tr:active {
   position: absolute;
   float: right;
   right: 0px;
-  height: calc(100% - 81px);
+  height: calc(100vh - 103px);
   padding: 40px;
+  overflow-y: auto;
 }
 .invoice-page {
   background-color: #fff;

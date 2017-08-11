@@ -8,6 +8,7 @@ var moment = require('moment');
 var api = localStorage.getItem('api');
 var classNames = require('classnames');
 var InvoiceTemplate = require('../InvoiceTemplate.jsx');
+var AnimatedNumber = require('react-animated-number');
 
 class History extends React.Component
 {
@@ -37,13 +38,20 @@ class History extends React.Component
       this.handleDeleteInvoices = this.handleDeleteInvoices.bind(this);
       this.getCurrentInvoiceProducts = this.getCurrentInvoiceProducts.bind(this);
       this.getCurrentInvoice = this.getCurrentInvoice.bind(this);
+      this.getTotal = this.getTotal.bind(this);
+      this.printReport = this.printReport.bind(this);
   }
 
   componentDidMount() {
     this.getInvoices();
   }
 
+  printReport() {
+    this.setState({ currentInvoice: -1 });
+  }
+
   getInvoices(page = 1) {
+    this.setState({ currentInvoice: null });
     var append = (page != 1) ? "?page=" + page : "";
     fetch(api + this.state.api_slug + append).then((response) => {
       return response.json();
@@ -209,6 +217,14 @@ class History extends React.Component
     return invoice;
   }
 
+  getTotal() {
+    var total = 0;
+    this.state.invoices.map(function(k, i) {
+      total += k.total;
+    });
+    return total;
+  }
+
   render() {
     return(
       <div>
@@ -287,8 +303,8 @@ class History extends React.Component
                   <th><input type="checkbox" id="main-check" onChange={this.handleChecked} defaultChecked={false} /></th>
                   <th>#</th>
                   <th>Day Seq.</th>
-                  <th>Total</th>
                   <th>Created at</th>
+                  <th>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -305,14 +321,21 @@ class History extends React.Component
                       <td><input type="checkbox" value={v.id} checked={checked} onClick={(e) => { this.handleChecked(e, v.id) }} defaultChecked={false} /></td>
                       <td>{v.id}</td>
                       <td>{v.day_seq}</td>
-                      <td>{v.total}</td>
                       <td>{v.created_at}</td>
+                      <td>{v.total}</td>
                     </tr>
                   )
                 }.bind(this))
               }
               </tbody>
             </table>
+          </div>
+          <div className="reportTotal">
+            <button type="button" className="btn btn-default" onClick={this.printReport}>
+            <span className="icon icon-chart-bar icon-text"></span>
+            Preview Report
+            </button>
+            <p>₹ <AnimatedNumber component="text" value={this.getTotal()} style={{ transition: '0.8s ease-out', transitionProperty: 'background-color, color, opacity'}} duration={200} formatValue={(n) => { return parseFloat(n).toFixed(2); }} /></p>
           </div>
         </div>
         <div className="bill-area">
@@ -326,6 +349,10 @@ class History extends React.Component
                 )
               }
             }.bind(this))
+          }
+          {
+            this.state.currentInvoice == -1 &&
+            <InvoiceTemplate report={this.state.invoices} />
           }
         </div>
       </div>
