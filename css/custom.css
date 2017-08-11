@@ -43,6 +43,8 @@
   margin-top: 0px;
 }
 .stock-table {
+  overflow-y: auto;
+  height: calc(100vh - 103px);
   width: 60%;
 }
 .stock-management {

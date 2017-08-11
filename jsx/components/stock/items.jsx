@@ -249,7 +249,8 @@ class Item extends React.Component
 
       <div className="content-area">
         <PageCard icon="icon-list-add" title="Stock Management" description="Add, edit or remove items from stock" />
-          <table className="stock-table table-striped pull-left">
+          <div className="stock-table pull-left">
+          <table className="table-striped">
             <thead>
               <tr>
                 <th>Code</th>
@@ -279,6 +280,7 @@ class Item extends React.Component
 
             </tbody>
           </table>
+          </div>
 
           {this.renderForm()}
 
