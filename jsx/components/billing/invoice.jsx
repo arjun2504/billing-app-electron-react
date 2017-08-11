@@ -40,6 +40,10 @@ class Invoice extends React.Component
       this.state.active_invoice = nextId;
       this.state.next_bid = nextId + 1;
       this.state.invoices.push(this.getBlankInvoice(nextId));
+
+      if(localStorage.getItem('day_seq') == null)
+        this.setDaySeq();
+
       this.saveToLocal();
       this.forceUpdate();
     }).catch((err) => { console.log(err) });
@@ -112,7 +116,7 @@ class Invoice extends React.Component
     //this.renderPrint = this.renderPrint.bind(this);
 
 
-    this.setDaySeq();
+    //this.setDaySeq();
 
     if(localStorage.getItem('state') == null) {
 
@@ -194,7 +198,10 @@ class Invoice extends React.Component
     blankInvoice.day_seq = localStorage.getItem('day_seq');
     var seq = localStorage.getItem('day_seq');
     //localStorage.setItem('day_seq', (parseInt(seq) + 1));
-    this.setDaySeq(1);
+    if(seq != null)
+      this.setDaySeq(1);
+    else
+      this.setDaySeq();
 
     this.state.invoices.push(blankInvoice);
 
